@@ -225,7 +225,7 @@
     cursor: not-allowed;
     filter: grayscale(0.7);
   }
-  .char-emoji { font-size: 45px; }
+  .char-emoji { font-size: 40px; line-height: 1.2; }
   .char-name {
     font-weight: 900;
     color: white;
@@ -1166,6 +1166,51 @@ function playSound(type) {
         });
         break;
       }
+      case 'foodthrow': {
+        // Cafeteria food throw: metal tray clang + splatty impact
+        // Tray clang
+        const tray = ctx.createOscillator();
+        const trayGain = ctx.createGain();
+        tray.type = 'square';
+        tray.frequency.setValueAtTime(800, ctx.currentTime);
+        tray.frequency.linearRampToValueAtTime(200, ctx.currentTime + 0.15);
+        trayGain.gain.setValueAtTime(0.15, ctx.currentTime);
+        trayGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+        tray.connect(trayGain).connect(ctx.destination);
+        tray.start(ctx.currentTime);
+        tray.stop(ctx.currentTime + 0.2);
+
+        // Splat noise
+        const splatSize = ctx.sampleRate * 0.35;
+        const splatBuf = ctx.createBuffer(1, splatSize, ctx.sampleRate);
+        const splatData = splatBuf.getChannelData(0);
+        for (let i = 0; i < splatSize; i++) splatData[i] = (Math.random() * 2 - 1) * 0.6;
+        const splat = ctx.createBufferSource();
+        splat.buffer = splatBuf;
+        const splatGain = ctx.createGain();
+        const splatFilter = ctx.createBiquadFilter();
+        splatFilter.type = 'lowpass';
+        splatFilter.frequency.value = 1200;
+        splatGain.gain.setValueAtTime(0, ctx.currentTime + 0.1);
+        splatGain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.15);
+        splatGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        splat.connect(splatFilter).connect(splatGain).connect(ctx.destination);
+        splat.start(ctx.currentTime + 0.1);
+        splat.stop(ctx.currentTime + 0.5);
+
+        // Funny rising "boing" after splat
+        const boing = ctx.createOscillator();
+        const boingGain = ctx.createGain();
+        boing.type = 'sine';
+        boing.frequency.setValueAtTime(300, ctx.currentTime + 0.2);
+        boing.frequency.linearRampToValueAtTime(900, ctx.currentTime + 0.35);
+        boingGain.gain.setValueAtTime(0.12, ctx.currentTime + 0.2);
+        boingGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.45);
+        boing.connect(boingGain).connect(ctx.destination);
+        boing.start(ctx.currentTime + 0.2);
+        boing.stop(ctx.currentTime + 0.45);
+        break;
+      }
       case 'click': {
         // Quick pop/click
         const osc = ctx.createOscillator();
@@ -1185,14 +1230,16 @@ function playSound(type) {
 
 // ===== GAME DATA =====
 const CHARACTERS = [
-  { id: 'webb', name: 'Webb', emoji: '🏄', board: '🟦', unlockLevel: 0, quote: "Let's shred!" },
-  { id: 'wilem', name: 'Wilem', emoji: '🏄‍♂️', board: '🟥', unlockLevel: 1, quote: "Catch me if you can!" },
-  { id: 'quinn', name: 'Quinn', emoji: '🏄‍♀️', board: '🟪', unlockLevel: 2, quote: "Wave queen!" },
-  { id: 'jackie', name: 'Jackie', emoji: '🏄', board: '🟩', unlockLevel: 3, quote: "Surf's up, dude!" },
+  { id: 'webb', name: 'Webb', emoji: '😎⛓️🏄', board: '🟦', unlockLevel: 0, quote: "Too cool for school! 😎", style: 'cool' },
+  { id: 'wilem', name: 'Wilem', emoji: '⚾🏄‍♂️', board: '🟥', unlockLevel: 1, quote: "Catch me if you can! ⚾", style: 'baseball' },
+  { id: 'quinn', name: 'Quinn', emoji: '🏄‍♀️', board: '🟪', unlockLevel: 2, quote: "Wave queen! 👑" },
+  { id: 'jackie', name: 'Jackie', emoji: '🐉🏄', board: '🟩', unlockLevel: 3, quote: "Dragon surfer, RAWR! 🔥", style: 'dragon' },
   { id: 'shai', name: 'Shai', emoji: '🏄‍♂️', board: '🟧', unlockLevel: 4, quote: "Shai the wave rider!" },
   { id: 'twins', name: 'Benj & Sam', emoji: '🏄‍♂️🏄', board: '🟨', unlockLevel: 5, quote: "Twin power!" },
-  { id: 'lunchlady', name: 'The Hot Lunch Lady', emoji: '🦸‍♀️', board: '⭐', unlockLevel: 7, quote: "Legendary surf goddess!" }
+  { id: 'lunchlady', name: 'The Hot Lunch Lady', emoji: '🦸‍♀️', board: '⭐', unlockLevel: 7, quote: "EAT YOUR LUNCH! 🍝", style: 'lunchlady' }
 ];
+
+const CAFETERIA_FOOD = ['🍝', '🍕', '🌮', '🍔', '🥪', '🍟', '🧁', '🥧', '🍖', '🫘', '🥩', '🍗', '🥔', '🧀', '🥛'];
 
 const LEVELS = [
   { id: 1, name: 'Beginner Beach', ops: ['+'], min: 1, max: 10, desc: 'Addition 1-10', emoji: '🏖️' },
@@ -1231,6 +1278,13 @@ const CORRECT_MESSAGES = [
   "Radical! 🤙", "Cowabunga! 🌊", "Gnarly! 🏄", "Tubular! 🔥",
   "Hang ten! 🤟", "Sick trick! 💥", "Epic wave! 🌊",
   "Totally awesome! ⭐", "Shredding it! 🎸", "Bodacious! 🏆"
+];
+
+const LUNCHLADY_MESSAGES = [
+  "ORDER UP! 🍝", "Lunch is SERVED! 🍕", "FOOD FIGHT! 🌮",
+  "Eat THIS! 🍔", "Extra helpings! 🍟", "Kitchen combo! 🧁",
+  "Special of the day! 🍖", "Cafeteria SMASH! 🥧",
+  "Get your trays! 🍗", "Serving heat! 🔥"
 ];
 
 const CONFETTI_ITEMS = ['🌊', '⭐', '🏄', '🐚', '🌴', '🎉', '🤙', '🔥', '🏆', '🦩'];
@@ -1552,15 +1606,16 @@ function checkAnswer(choice, btn) {
     state.totalScore += points;
 
     surfer.className = 'surfer-container dodge';
-    playSound('correct');
+    playSound(state.selectedChar === 'lunchlady' ? 'foodthrow' : 'correct');
     // Delay the obstacle blast slightly so the surfer turns first, then spray hits
     setTimeout(() => {
       showSprayBlast();
       obstacle.className = 'obstacle-container dodged';
     }, 300);
 
-    // Show splash message
-    showSplash(CORRECT_MESSAGES[Math.floor(Math.random() * CORRECT_MESSAGES.length)] + ` +${points}`);
+    // Show splash message (Lunch Lady gets food-themed messages!)
+    const msgs = state.selectedChar === 'lunchlady' ? LUNCHLADY_MESSAGES : CORRECT_MESSAGES;
+    showSplash(msgs[Math.floor(Math.random() * msgs.length)] + ` +${points}`);
 
     updateHUD();
     setTimeout(() => nextQuestion(), 1200);
@@ -1607,56 +1662,106 @@ function showSprayBlast() {
   const originX = rect.right - 20;
   const originY = rect.top + rect.height / 2;
 
-  // Spray water particles flying toward obstacle
-  const droplets = ['💦', '💧', '🌊', '💦', '💧', '💦', '🌊', '💦'];
-  for (let i = 0; i < 18; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'spray-particle';
-    const size = 8 + Math.random() * 18;
-    const angle = -30 + Math.random() * 60; // spray cone toward the right
-    const distance = 200 + Math.random() * 400;
-    const dx = Math.cos(angle * Math.PI / 180) * distance;
-    const dy = Math.sin(angle * Math.PI / 180) * distance;
-    const duration = 0.4 + Math.random() * 0.5;
+  const isLunchLady = state.selectedChar === 'lunchlady';
 
-    particle.style.cssText = `
-      left: ${originX}px; top: ${originY + (Math.random() - 0.5) * 60}px;
-      width: ${size}px; height: ${size}px;
-      background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(135,206,235,0.7));
-      animation-duration: ${duration}s;
-      animation-delay: ${Math.random() * 0.15}s;
-    `;
-    particle.style.setProperty('--dx', dx + 'px');
-    particle.style.setProperty('--dy', dy + 'px');
-    // Override animation with inline to get directional movement
-    particle.animate([
-      { transform: 'scale(1)', opacity: 0.9, left: originX + 'px', top: (originY + (Math.random() - 0.5) * 60) + 'px' },
-      { transform: 'scale(0.3)', opacity: 0, left: (originX + dx) + 'px', top: (originY + dy) + 'px' }
-    ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
+  if (isLunchLady) {
+    // HOT LUNCH LADY: Throw cafeteria food!
+    for (let i = 0; i < 12; i++) {
+      const food = document.createElement('div');
+      food.className = 'spray-droplet';
+      food.textContent = CAFETERIA_FOOD[Math.floor(Math.random() * CAFETERIA_FOOD.length)];
+      food.style.fontSize = (28 + Math.random() * 20) + 'px';
+      const angle = -35 + Math.random() * 70;
+      const distance = 180 + Math.random() * 380;
+      const dx = Math.cos(angle * Math.PI / 180) * distance;
+      const dy = Math.sin(angle * Math.PI / 180) * distance;
+      const duration = 0.5 + Math.random() * 0.4;
+      const startY = originY + (Math.random() - 0.5) * 50;
 
-    container.appendChild(particle);
-  }
+      food.style.left = originX + 'px';
+      food.style.top = startY + 'px';
 
-  // Emoji splash droplets
-  for (let i = 0; i < 8; i++) {
-    const drop = document.createElement('div');
-    drop.className = 'spray-droplet';
-    drop.textContent = droplets[i % droplets.length];
-    const angle = -40 + Math.random() * 80;
-    const distance = 150 + Math.random() * 350;
-    const dx = Math.cos(angle * Math.PI / 180) * distance;
-    const dy = Math.sin(angle * Math.PI / 180) * distance;
-    const duration = 0.5 + Math.random() * 0.4;
+      food.animate([
+        { transform: 'scale(0.3) rotate(0deg)', opacity: 1, left: originX + 'px', top: startY + 'px' },
+        { transform: 'scale(1.8) rotate(' + (180 + Math.random() * 360) + 'deg)', opacity: 0, left: (originX + dx) + 'px', top: (startY + dy) + 'px' }
+      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
 
-    drop.style.left = originX + 'px';
-    drop.style.top = (originY + (Math.random() - 0.5) * 40) + 'px';
+      container.appendChild(food);
+    }
 
-    drop.animate([
-      { transform: 'scale(0.5) rotate(0deg)', opacity: 1, left: originX + 'px', top: (originY + (Math.random() - 0.5) * 40) + 'px' },
-      { transform: 'scale(1.5) rotate(180deg)', opacity: 0, left: (originX + dx) + 'px', top: (originY + dy) + 'px' }
-    ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
+    // Add some splatter particles (brown/orange for food mess)
+    for (let i = 0; i < 10; i++) {
+      const splat = document.createElement('div');
+      splat.className = 'spray-particle';
+      const size = 10 + Math.random() * 16;
+      const angle = -30 + Math.random() * 60;
+      const distance = 200 + Math.random() * 300;
+      const dx = Math.cos(angle * Math.PI / 180) * distance;
+      const dy = Math.sin(angle * Math.PI / 180) * distance;
+      const duration = 0.4 + Math.random() * 0.4;
+      const colors = ['rgba(210,120,50,0.9)', 'rgba(255,200,80,0.8)', 'rgba(180,80,30,0.85)', 'rgba(240,160,60,0.9)'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const startY = originY + (Math.random() - 0.5) * 60;
 
-    container.appendChild(drop);
+      splat.style.cssText = `left:${originX}px; top:${startY}px; width:${size}px; height:${size}px; background:${color};`;
+
+      splat.animate([
+        { transform: 'scale(1)', opacity: 0.9, left: originX + 'px', top: startY + 'px' },
+        { transform: 'scale(0.2)', opacity: 0, left: (originX + dx) + 'px', top: (startY + dy) + 'px' }
+      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
+
+      container.appendChild(splat);
+    }
+
+  } else {
+    // Normal surfer: Spray water particles flying toward obstacle
+    const droplets = ['💦', '💧', '🌊', '💦', '💧', '💦', '🌊', '💦'];
+    for (let i = 0; i < 18; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'spray-particle';
+      const size = 8 + Math.random() * 18;
+      const angle = -30 + Math.random() * 60;
+      const distance = 200 + Math.random() * 400;
+      const dx = Math.cos(angle * Math.PI / 180) * distance;
+      const dy = Math.sin(angle * Math.PI / 180) * distance;
+      const duration = 0.4 + Math.random() * 0.5;
+
+      particle.style.cssText = `
+        left: ${originX}px; top: ${originY + (Math.random() - 0.5) * 60}px;
+        width: ${size}px; height: ${size}px;
+        background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(135,206,235,0.7));
+        animation-duration: ${duration}s;
+        animation-delay: ${Math.random() * 0.15}s;
+      `;
+      particle.animate([
+        { transform: 'scale(1)', opacity: 0.9, left: originX + 'px', top: (originY + (Math.random() - 0.5) * 60) + 'px' },
+        { transform: 'scale(0.3)', opacity: 0, left: (originX + dx) + 'px', top: (originY + dy) + 'px' }
+      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
+
+      container.appendChild(particle);
+    }
+
+    // Emoji splash droplets
+    for (let i = 0; i < 8; i++) {
+      const drop = document.createElement('div');
+      drop.className = 'spray-droplet';
+      drop.textContent = droplets[i % droplets.length];
+      const angle = -40 + Math.random() * 80;
+      const distance = 150 + Math.random() * 350;
+      const dx = Math.cos(angle * Math.PI / 180) * distance;
+      const dy = Math.sin(angle * Math.PI / 180) * distance;
+      const duration = 0.5 + Math.random() * 0.4;
+
+      drop.style.left = originX + 'px';
+      drop.style.top = (originY + (Math.random() - 0.5) * 40) + 'px';
+
+      drop.animate([
+        { transform: 'scale(0.5) rotate(0deg)', opacity: 1, left: originX + 'px', top: (originY + (Math.random() - 0.5) * 40) + 'px' },
+        { transform: 'scale(1.5) rotate(180deg)', opacity: 0, left: (originX + dx) + 'px', top: (originY + dy) + 'px' }
+      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
+
+      container.appendChild(drop);
+    }
   }
 
   setTimeout(() => container.remove(), 1200);
