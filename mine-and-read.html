@@ -1,0 +1,2390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+<title>Webb's Mine & Read</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --grass-green: #5d8c3e;
+    --grass-top: #7ec850;
+    --dirt-brown: #8b6914;
+    --dirt-dark: #6b4c12;
+    --stone-gray: #7f7f7f;
+    --stone-dark: #5a5a5a;
+    --sky-top: #78b9ff;
+    --sky-bottom: #b8e0ff;
+    --coal-black: #333;
+    --iron-silver: #c8c8c8;
+    --gold-yellow: #ffd700;
+    --diamond-blue: #4ee4fc;
+    --nether-red: #8b2020;
+    --nether-orange: #d4621a;
+    --correct-green: #4caf50;
+    --wrong-red: #f44336;
+    --xp-green: #7dff3a;
+  }
+
+  body {
+    font-family: 'Nunito', Arial, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 45%, var(--grass-green) 45.5%, var(--dirt-brown) 60%, var(--stone-gray) 75%, var(--stone-dark) 100%);
+    user-select: none;
+    image-rendering: pixelated;
+    transition: background 0.8s ease;
+  }
+
+  /* ===== PIXEL BACKGROUND ===== */
+  .mine-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  /* Grass block strip */
+  .grass-strip {
+    position: absolute;
+    bottom: 55%;
+    width: 100%;
+    height: 20px;
+    background: repeating-linear-gradient(90deg,
+      var(--grass-top) 0px, var(--grass-top) 32px,
+      #6abf45 32px, #6abf45 64px);
+  }
+
+  /* Dirt texture */
+  .dirt-layer {
+    position: absolute;
+    bottom: 40%;
+    width: 100%;
+    height: 15%;
+    background: repeating-linear-gradient(90deg,
+      var(--dirt-brown) 0px, var(--dirt-brown) 32px,
+      var(--dirt-dark) 32px, var(--dirt-dark) 64px);
+    opacity: 0.3;
+  }
+
+  /* Stone texture */
+  .stone-layer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40%;
+    background: repeating-linear-gradient(90deg,
+      var(--stone-gray) 0px, var(--stone-gray) 32px,
+      var(--stone-dark) 32px, var(--stone-dark) 64px);
+    opacity: 0.15;
+  }
+
+  /* Ore sparkles */
+  .ore-sparkle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 0;
+    animation: sparkle 2s ease-in-out infinite;
+  }
+  @keyframes sparkle {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+  }
+
+  /* Blocky clouds */
+  .cloud {
+    position: fixed;
+    opacity: 0.85;
+    z-index: 0;
+    animation: cloud-drift linear infinite;
+  }
+  .cloud-block {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    vertical-align: top;
+  }
+  .cloud1 { top: 30px; left: -200px; animation-duration: 30s; }
+  .cloud2 { top: 70px; left: -200px; animation-duration: 40s; animation-delay: -12s; }
+  .cloud3 { top: 15px; left: -200px; animation-duration: 35s; animation-delay: -22s; }
+  @keyframes cloud-drift {
+    0% { transform: translateX(-200px); }
+    100% { transform: translateX(calc(100vw + 200px)); }
+  }
+
+  /* ===== SCREENS ===== */
+  .screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: opacity 0.4s, transform 0.4s;
+  }
+  .screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95);
+  }
+
+  /* ===== TITLE SCREEN ===== */
+  .title-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(28px, 6vw, 52px);
+    color: white;
+    text-shadow:
+      4px 4px 0 var(--dirt-dark),
+      -2px -2px 0 var(--grass-green),
+      0 0 20px rgba(125,255,58,0.4);
+    text-align: center;
+    animation: title-bounce 2s ease-in-out infinite;
+    line-height: 1.4;
+  }
+  .title-text .subtitle {
+    font-size: clamp(12px, 2.5vw, 22px);
+    display: block;
+    color: var(--gold-yellow);
+    text-shadow: 3px 3px 0 var(--dirt-dark);
+    margin-top: 10px;
+  }
+  @keyframes title-bounce {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-10px) rotate(1deg); }
+  }
+
+  .title-miner {
+    font-size: 80px;
+    animation: miner-bob 1.5s ease-in-out infinite;
+    margin: 10px 0;
+  }
+  @keyframes miner-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  .menu-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(10px, 1.8vw, 16px);
+    font-weight: 900;
+    padding: 15px 30px;
+    margin: 8px;
+    border: 4px solid rgba(0,0,0,0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    image-rendering: pixelated;
+  }
+  .menu-btn:hover {
+    transform: scale(1.08) translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  }
+  .menu-btn:active {
+    transform: scale(0.95);
+  }
+  .btn-play {
+    background: linear-gradient(180deg, #5a5, #383);
+    color: white;
+    box-shadow: 0 4px 15px rgba(56,136,56,0.5);
+    font-size: clamp(12px, 2.5vw, 20px);
+  }
+  .btn-leaderboard {
+    background: linear-gradient(180deg, var(--gold-yellow), #c9a500);
+    color: #333;
+    box-shadow: 0 4px 15px rgba(201,165,0,0.5);
+  }
+  .btn-characters {
+    background: linear-gradient(180deg, var(--diamond-blue), #2bb8d0);
+    color: #1a3a4a;
+    box-shadow: 0 4px 15px rgba(78,228,252,0.4);
+  }
+  .btn-back {
+    background: linear-gradient(180deg, var(--stone-gray), var(--stone-dark));
+    color: white;
+    box-shadow: 0 4px 15px rgba(90,90,90,0.4);
+  }
+  .btn-next {
+    background: linear-gradient(180deg, var(--correct-green), #388e3c);
+    color: white;
+    box-shadow: 0 4px 15px rgba(76,175,80,0.5);
+  }
+
+  /* ===== CHARACTER SELECT ===== */
+  .char-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    max-width: 700px;
+    width: 90%;
+    margin: 20px 0;
+  }
+  .char-card {
+    background: rgba(0,0,0,0.3);
+    border: 4px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 15px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .char-card:hover:not(.locked) {
+    transform: translateY(-5px);
+    background: rgba(0,0,0,0.45);
+  }
+  .char-card.selected {
+    border-color: var(--gold-yellow);
+    background: rgba(255,215,0,0.2);
+    transform: scale(1.05);
+  }
+  .char-card.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(0.7);
+  }
+  .char-emoji { font-size: 40px; line-height: 1.2; }
+  .char-name {
+    font-family: 'Press Start 2P', monospace;
+    font-weight: 900;
+    color: white;
+    font-size: 9px;
+    margin-top: 5px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  }
+  .char-board {
+    font-size: 10px;
+    color: var(--gold-yellow);
+    margin-top: 3px;
+  }
+  .lock-icon { font-size: 20px; margin-top: 5px; }
+
+  /* ===== LEVEL SELECT ===== */
+  .level-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    max-width: 750px;
+    width: 90%;
+    margin: 20px 0;
+  }
+  .level-card {
+    background: rgba(0,0,0,0.3);
+    border: 4px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .level-card:hover:not(.locked) {
+    transform: translateY(-4px);
+    background: rgba(0,0,0,0.45);
+  }
+  .level-card.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .level-card.completed {
+    border-color: var(--correct-green);
+    background: rgba(76,175,80,0.2);
+  }
+  .level-num {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--gold-yellow);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  }
+  .level-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: white;
+    font-weight: 700;
+    margin-top: 4px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+  }
+  .level-desc {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 3px;
+  }
+
+  /* ===== GAME SCREEN ===== */
+  .game-hud {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: rgba(0,0,0,0.5);
+    border-bottom: 4px solid rgba(0,0,0,0.3);
+    z-index: 20;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .hud-level {
+    font-family: 'Press Start 2P', monospace;
+    font-weight: 900;
+    color: var(--gold-yellow);
+    font-size: clamp(8px, 1.5vw, 13px);
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  }
+  .hud-score {
+    font-family: 'Press Start 2P', monospace;
+    font-weight: 900;
+    color: white;
+    font-size: clamp(10px, 2vw, 16px);
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  }
+  .hud-streak {
+    font-family: 'Press Start 2P', monospace;
+    font-weight: 900;
+    color: var(--nether-orange);
+    font-size: clamp(8px, 1.5vw, 13px);
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  }
+  .hud-lives {
+    font-size: clamp(20px, 3vw, 30px);
+    display: flex;
+    gap: 3px;
+  }
+  .hud-progress {
+    font-family: 'Press Start 2P', monospace;
+    font-weight: 700;
+    color: rgba(255,255,255,0.8);
+    font-size: clamp(7px, 1.2vw, 11px);
+  }
+
+  /* Game area */
+  .game-area {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Mine scene */
+  .mine-scene {
+    position: relative;
+    width: 90%;
+    max-width: 750px;
+    height: 240px;
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .miner-container {
+    font-size: 90px;
+    position: relative;
+    z-index: 5;
+    transition: transform 0.3s;
+    animation: miner-idle 1.5s ease-in-out infinite;
+  }
+  @keyframes miner-idle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .miner-container.mining {
+    animation: miner-swing 0.8s ease-out;
+  }
+  @keyframes miner-swing {
+    0% { transform: translateY(0) scaleX(1) rotate(0); }
+    15% { transform: translateY(-5px) rotate(-20deg); }
+    30% { transform: translateY(0) rotate(15deg) scaleX(1.1); }
+    50% { transform: translateX(30px) rotate(10deg) scaleX(1.15); }
+    70% { transform: translateX(15px) rotate(-5deg) scaleX(1.05); }
+    100% { transform: translateY(0) scaleX(1) rotate(0); }
+  }
+  .miner-container.damaged {
+    animation: miner-hurt 1s ease-out;
+  }
+  @keyframes miner-hurt {
+    0% { transform: translateY(0) rotate(0); filter: brightness(1); }
+    15% { transform: translateX(-20px) rotate(-10deg); filter: brightness(2); }
+    30% { transform: translateX(10px) rotate(5deg); filter: brightness(1); }
+    45% { transform: translateX(-15px) rotate(-5deg); filter: brightness(2); }
+    60% { transform: translateX(5px); filter: brightness(1); }
+    100% { transform: translateY(0) rotate(0); filter: brightness(1); }
+  }
+
+  /* Block platform under miner */
+  .miner-platform {
+    display: block;
+    position: relative;
+    margin-top: -10px;
+    text-align: center;
+    width: 120px;
+    height: 40px;
+  }
+  .platform-block {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0,0,0,0.3);
+    vertical-align: top;
+  }
+  .block-grass { background: linear-gradient(180deg, var(--grass-top) 30%, var(--dirt-brown) 30%); }
+  .block-dirt { background: var(--dirt-brown); }
+
+  /* Mob/Obstacle */
+  .obstacle-container {
+    position: relative;
+    text-align: center;
+    transition: transform 0.5s, opacity 0.5s;
+  }
+  .obstacle-container.entering {
+    animation: mob-enter 0.6s ease-out forwards;
+  }
+  @keyframes mob-enter {
+    0% { transform: translateX(200px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  .obstacle-container.dodged {
+    animation: mob-defeated 0.8s ease-out forwards;
+  }
+  @keyframes mob-defeated {
+    0% { transform: translateX(0) scale(1) rotate(0); opacity: 1; filter: blur(0); }
+    20% { transform: scale(1.3) rotate(-5deg); filter: brightness(3); }
+    50% { transform: translateY(-40px) scale(0.8) rotate(20deg); opacity: 0.6; filter: blur(2px); }
+    100% { transform: translateY(80px) scale(0.1) rotate(90deg); opacity: 0; filter: blur(6px); }
+  }
+  .obstacle-container.hit {
+    animation: mob-attack 0.5s ease-out;
+  }
+  @keyframes mob-attack {
+    0% { transform: translateX(0) scale(1); }
+    30% { transform: translateX(-60px) scale(1.2); }
+    60% { transform: translateX(-30px) scale(1.1); }
+    100% { transform: translateX(0) scale(1); }
+  }
+
+  .obstacle-emoji {
+    font-size: 95px;
+    display: block;
+  }
+  .speech-bubble {
+    position: relative;
+    background: #333;
+    color: #4f4;
+    border: 4px solid #555;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(8px, 1.5vw, 12px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    margin-bottom: 10px;
+    max-width: 260px;
+    animation: bubble-pop 0.4s ease-out;
+  }
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 10px solid transparent;
+    border-top-color: #333;
+    border-bottom: 0;
+  }
+  @keyframes bubble-pop {
+    0% { transform: scale(0); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Mob taunt zoom (wrong answer) */
+  .mob-zoom {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+    animation: mob-zoom-anim 1.5s ease-out forwards;
+  }
+  .mob-zoom-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(16px, 5vw, 40px);
+    color: var(--wrong-red);
+    text-shadow: 3px 3px 0 #800;
+    text-align: center;
+    padding: 20px;
+  }
+  @keyframes mob-zoom-anim {
+    0% { opacity: 0; transform: scale(0.3); }
+    30% { opacity: 1; transform: scale(1.2); }
+    60% { transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.5); }
+  }
+
+  /* Mining effect (correct answer) */
+  .mine-effect {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(20px, 5vw, 40px);
+    color: var(--xp-green);
+    text-shadow: 3px 3px 0 #1a4a0a;
+    z-index: 100;
+    pointer-events: none;
+    animation: mine-splash 1s ease-out forwards;
+    text-align: center;
+  }
+  @keyframes mine-splash {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    40% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5) translateY(-40px); }
+  }
+
+  /* Block particles (correct answer) */
+  .particle-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 90;
+    overflow: hidden;
+  }
+  .block-particle {
+    position: absolute;
+    border-radius: 0;
+    animation: block-fly linear forwards;
+  }
+  @keyframes block-fly {
+    0% { transform: scale(1) rotate(0); opacity: 0.9; }
+    50% { opacity: 0.7; }
+    100% { transform: scale(0.2) rotate(180deg); opacity: 0; }
+  }
+  .xp-orb {
+    position: absolute;
+    font-size: 28px;
+    animation: xp-fly linear forwards;
+    pointer-events: none;
+  }
+  @keyframes xp-fly {
+    0% { transform: scale(0.5) rotate(0); opacity: 1; }
+    40% { opacity: 0.9; }
+    100% { transform: scale(1.2) rotate(180deg); opacity: 0; }
+  }
+
+  /* Question area */
+  .question-area {
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+    margin-top: 10px;
+  }
+  .question-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(12px, 2.5vw, 20px);
+    color: white;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    margin-bottom: 15px;
+    background: rgba(0,0,0,0.5);
+    border: 4px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 15px 20px;
+    line-height: 1.6;
+  }
+  .answers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .answer-btn {
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: clamp(16px, 3vw, 24px);
+    font-weight: 900;
+    padding: 12px 16px;
+    border: 4px solid rgba(0,0,0,0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(230,230,230,0.85));
+    color: #333;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .answer-btn:hover {
+    transform: scale(1.06) translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+  }
+  .answer-btn:active {
+    transform: scale(0.95);
+  }
+  .answer-btn.correct {
+    background: linear-gradient(180deg, var(--correct-green), #388e3c) !important;
+    color: white !important;
+    transform: scale(1.1);
+  }
+  .answer-btn.wrong {
+    background: linear-gradient(180deg, var(--wrong-red), #c62828) !important;
+    color: white !important;
+    animation: shake 0.4s;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  /* ===== LEADERBOARD ===== */
+  .leaderboard-panel {
+    background: rgba(0,0,0,0.5);
+    border: 4px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  .leaderboard-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(12px, 3vw, 20px);
+    color: var(--gold-yellow);
+    text-align: center;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    margin-bottom: 15px;
+  }
+  .lb-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid transparent;
+    transition: background 0.2s;
+  }
+  .lb-row.player-row {
+    background: rgba(255,215,0,0.15);
+    border: 2px solid var(--gold-yellow);
+  }
+  .lb-rank {
+    font-family: 'Press Start 2P', monospace;
+    font-weight: 900;
+    font-size: 12px;
+    color: var(--gold-yellow);
+    width: 40px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  }
+  .lb-avatar { font-size: 28px; margin-right: 10px; }
+  .lb-info { flex: 1; }
+  .lb-name {
+    font-weight: 900;
+    color: white;
+    font-size: 14px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  }
+  .lb-quote {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    font-style: italic;
+  }
+  .lb-score {
+    font-family: 'Press Start 2P', monospace;
+    font-weight: 900;
+    color: var(--xp-green);
+    font-size: 14px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  }
+
+  /* ===== LEVEL COMPLETE ===== */
+  .level-complete-panel {
+    background: rgba(0,0,0,0.6);
+    border: 4px solid var(--gold-yellow);
+    border-radius: 4px;
+    padding: 30px 40px;
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+  }
+  .complete-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(14px, 3.5vw, 26px);
+    color: var(--gold-yellow);
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    animation: title-bounce 1.5s ease-in-out infinite;
+  }
+  .complete-score {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(10px, 2vw, 16px);
+    color: white;
+    margin: 15px 0;
+    font-weight: 900;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    line-height: 2;
+  }
+  .unlock-announcement {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(10px, 2.5vw, 18px);
+    color: var(--diamond-blue);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    margin: 15px 0;
+    animation: unlock-pulse 0.8s ease-in-out infinite alternate;
+  }
+  .unlock-char {
+    font-size: 60px;
+    animation: unlock-spin 1s ease-out;
+  }
+  @keyframes unlock-pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+  }
+  @keyframes unlock-spin {
+    0% { transform: rotate(0) scale(0); opacity: 0; }
+    50% { transform: rotate(360deg) scale(1.3); opacity: 1; }
+    100% { transform: rotate(720deg) scale(1); }
+  }
+
+  /* Confetti / Block particles */
+  .confetti-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    overflow: hidden;
+  }
+  .confetti {
+    position: absolute;
+    top: -20px;
+    font-size: 24px;
+    animation: confetti-fall linear forwards;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0.3; }
+  }
+
+  /* ===== GAME OVER ===== */
+  .gameover-panel {
+    background: rgba(0,0,0,0.6);
+    border: 4px solid var(--wrong-red);
+    border-radius: 4px;
+    padding: 30px 40px;
+    text-align: center;
+    max-width: 450px;
+    width: 90%;
+  }
+  .gameover-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(16px, 4vw, 28px);
+    color: var(--wrong-red);
+    text-shadow: 3px 3px 0 #600;
+  }
+  .gameover-msg {
+    font-size: clamp(14px, 2.5vw, 20px);
+    color: white;
+    margin: 15px 0;
+    font-weight: 700;
+  }
+
+  /* Section headers */
+  .screen-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(14px, 3vw, 24px);
+    color: white;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 0; }
+
+  /* ===== MOBILE RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    .title-text {
+      font-size: clamp(18px, 7vw, 36px);
+    }
+    .title-text .subtitle {
+      font-size: clamp(8px, 2.5vw, 14px);
+    }
+    .title-miner { font-size: 60px; }
+    .menu-btn {
+      font-size: clamp(8px, 2.5vw, 14px);
+      padding: 10px 20px;
+      margin: 5px;
+    }
+    .btn-play {
+      font-size: clamp(10px, 3vw, 16px);
+    }
+    .screen-title {
+      font-size: clamp(10px, 4vw, 18px);
+    }
+
+    /* Game HUD */
+    .game-hud {
+      padding: 6px 10px;
+      gap: 3px;
+    }
+    .hud-level { font-size: clamp(6px, 2vw, 10px); }
+    .hud-score { font-size: clamp(8px, 2.5vw, 13px); }
+    .hud-streak { font-size: clamp(6px, 2vw, 10px); }
+    .hud-lives { font-size: clamp(16px, 4vw, 24px); }
+    .hud-progress { font-size: clamp(6px, 1.5vw, 9px); }
+
+    /* Mine scene */
+    .mine-scene {
+      height: 160px;
+      margin-top: 20px;
+    }
+    .miner-container {
+      font-size: 55px;
+    }
+    .miner-platform {
+      width: 75px;
+      height: 25px;
+      margin-top: -8px;
+    }
+    .platform-block {
+      width: 25px;
+      height: 25px;
+      border-width: 2px;
+    }
+    .obstacle-emoji {
+      font-size: 60px;
+    }
+    .speech-bubble {
+      font-size: clamp(6px, 2vw, 10px);
+      padding: 6px 10px;
+      max-width: 160px;
+    }
+
+    /* Question */
+    .question-area { margin-top: 5px; }
+    .question-text {
+      font-size: clamp(9px, 2.5vw, 14px);
+      padding: 10px 14px;
+      margin-bottom: 10px;
+    }
+    .answers-grid {
+      gap: 8px;
+      max-width: 340px;
+    }
+    .answer-btn {
+      font-size: clamp(14px, 4vw, 20px);
+      padding: 10px 12px;
+    }
+
+    /* Level/Char grids */
+    .char-grid {
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      gap: 8px;
+    }
+    .char-emoji { font-size: 32px; }
+    .char-name { font-size: 7px; }
+    .level-grid {
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+    }
+    .level-num { font-size: 22px; }
+    .level-name { font-size: 7px; }
+
+    /* Complete / Game Over panels */
+    .level-complete-panel, .gameover-panel {
+      padding: 20px 20px;
+    }
+    .complete-title, .gameover-title {
+      font-size: clamp(12px, 4vw, 22px);
+    }
+    .unlock-char { font-size: 45px; }
+  }
+
+  /* Extra small screens (iPhone SE etc) */
+  @media (max-width: 380px) {
+    .mine-scene { height: 130px; margin-top: 15px; }
+    .miner-container { font-size: 42px; }
+    .miner-platform { width: 60px; height: 20px; }
+    .platform-block { width: 20px; height: 20px; }
+    .obstacle-emoji { font-size: 45px; }
+    .speech-bubble { font-size: 6px; max-width: 130px; padding: 5px 7px; }
+    .question-text { font-size: clamp(8px, 2.5vw, 12px); padding: 8px 10px; }
+    .answer-btn { font-size: clamp(12px, 4vw, 18px); padding: 8px 10px; }
+  }
+
+  /* ===== DEPTH LEVEL BACKGROUNDS ===== */
+  /* Ore vein layers - hidden by default */
+  .ore-vein {
+    position: absolute;
+    width: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .coal-vein {
+    bottom: 20%; height: 60%;
+    background:
+      radial-gradient(4px 4px at 15% 30%, #222 70%, transparent 71%),
+      radial-gradient(6px 6px at 45% 60%, #333 70%, transparent 71%),
+      radial-gradient(5px 5px at 75% 25%, #222 70%, transparent 71%),
+      radial-gradient(4px 4px at 30% 80%, #333 70%, transparent 71%),
+      radial-gradient(6px 6px at 85% 50%, #222 70%, transparent 71%),
+      radial-gradient(5px 5px at 55% 15%, #333 70%, transparent 71%),
+      radial-gradient(4px 4px at 10% 65%, #222 70%, transparent 71%),
+      radial-gradient(5px 5px at 65% 75%, #333 70%, transparent 71%);
+  }
+  .iron-vein {
+    bottom: 10%; height: 70%;
+    background:
+      radial-gradient(5px 5px at 20% 35%, #d4c5a0 70%, transparent 71%),
+      radial-gradient(6px 6px at 50% 55%, #c8b890 70%, transparent 71%),
+      radial-gradient(5px 5px at 80% 20%, #d4c5a0 70%, transparent 71%),
+      radial-gradient(4px 4px at 35% 75%, #c8b890 70%, transparent 71%),
+      radial-gradient(6px 6px at 90% 45%, #d4c5a0 70%, transparent 71%),
+      radial-gradient(5px 5px at 60% 10%, #c8b890 70%, transparent 71%),
+      radial-gradient(4px 4px at 15% 60%, #d4c5a0 70%, transparent 71%),
+      radial-gradient(5px 5px at 70% 85%, #c8b890 70%, transparent 71%);
+  }
+  .gold-vein {
+    bottom: 5%; height: 80%;
+    background:
+      radial-gradient(5px 5px at 25% 30%, #ffd700 70%, transparent 71%),
+      radial-gradient(7px 7px at 55% 60%, #ffcc00 70%, transparent 71%),
+      radial-gradient(5px 5px at 85% 25%, #ffd700 70%, transparent 71%),
+      radial-gradient(6px 6px at 40% 80%, #ffcc00 70%, transparent 71%),
+      radial-gradient(5px 5px at 70% 15%, #ffd700 70%, transparent 71%),
+      radial-gradient(6px 6px at 15% 55%, #ffcc00 70%, transparent 71%),
+      radial-gradient(5px 5px at 60% 70%, #ffd700 70%, transparent 71%),
+      radial-gradient(7px 7px at 90% 50%, #ffcc00 70%, transparent 71%);
+  }
+  .diamond-vein {
+    bottom: 0; height: 85%;
+    background:
+      radial-gradient(6px 6px at 20% 40%, #4ee4fc 70%, transparent 71%),
+      radial-gradient(8px 8px at 50% 65%, #3dd4ec 70%, transparent 71%),
+      radial-gradient(6px 6px at 80% 30%, #4ee4fc 70%, transparent 71%),
+      radial-gradient(5px 5px at 35% 75%, #3dd4ec 70%, transparent 71%),
+      radial-gradient(7px 7px at 65% 20%, #4ee4fc 70%, transparent 71%),
+      radial-gradient(6px 6px at 10% 60%, #3dd4ec 70%, transparent 71%),
+      radial-gradient(5px 5px at 75% 80%, #4ee4fc 70%, transparent 71%),
+      radial-gradient(7px 7px at 45% 10%, #3dd4ec 70%, transparent 71%);
+  }
+  .obsidian-vein {
+    bottom: 0; height: 90%;
+    background:
+      radial-gradient(6px 6px at 25% 35%, #6a1b9a 70%, transparent 71%),
+      radial-gradient(7px 7px at 55% 60%, #7c26b0 70%, transparent 71%),
+      radial-gradient(5px 5px at 80% 25%, #6a1b9a 70%, transparent 71%),
+      radial-gradient(6px 6px at 40% 80%, #7c26b0 70%, transparent 71%),
+      radial-gradient(7px 7px at 70% 50%, #6a1b9a 70%, transparent 71%),
+      radial-gradient(5px 5px at 15% 70%, #7c26b0 70%, transparent 71%);
+  }
+  .lava-layer {
+    bottom: 0; height: 100%;
+    background:
+      radial-gradient(30px 20px at 20% 85%, rgba(255,100,0,0.6) 40%, transparent 70%),
+      radial-gradient(40px 25px at 60% 90%, rgba(255,60,0,0.5) 40%, transparent 70%),
+      radial-gradient(35px 20px at 85% 80%, rgba(255,120,0,0.5) 40%, transparent 70%),
+      radial-gradient(25px 15px at 40% 95%, rgba(255,80,0,0.6) 40%, transparent 70%),
+      radial-gradient(8px 8px at 15% 40%, #ff4500 70%, transparent 71%),
+      radial-gradient(6px 6px at 50% 30%, #ff6600 70%, transparent 71%),
+      radial-gradient(7px 7px at 80% 55%, #ff4500 70%, transparent 71%),
+      radial-gradient(5px 5px at 35% 65%, #ff6600 70%, transparent 71%);
+    animation: lava-pulse 3s ease-in-out infinite alternate;
+  }
+  @keyframes lava-pulse {
+    0% { opacity: 0.6; }
+    100% { opacity: 0.9; }
+  }
+
+  /* Depth 1: Dirt Layer - surface level (default look) */
+  body.depth-1 {
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 45%, var(--grass-green) 45.5%, var(--dirt-brown) 60%, var(--stone-gray) 75%, var(--stone-dark) 100%);
+  }
+  .depth-1 .grass-strip { opacity: 1; }
+  .depth-1 .dirt-layer { opacity: 0.3; }
+  .depth-1 .stone-layer { opacity: 0.15; }
+  .depth-1 .cloud { opacity: 0.85; }
+
+  /* Depth 2: Stone Layer - less sky, more underground */
+  body.depth-2 {
+    background: linear-gradient(180deg, var(--sky-bottom) 0%, #a0c8e8 15%, var(--dirt-brown) 25%, var(--dirt-dark) 40%, var(--stone-gray) 60%, var(--stone-dark) 100%);
+  }
+  .depth-2 .grass-strip { opacity: 0; }
+  .depth-2 .dirt-layer { opacity: 0.5; bottom: 50%; height: 20%; }
+  .depth-2 .stone-layer { opacity: 0.25; height: 50%; }
+  .depth-2 .cloud { opacity: 0.3; }
+
+  /* Depth 3: Coal Mine - thin sky sliver, mostly stone */
+  body.depth-3 {
+    background: linear-gradient(180deg, #8aa8c0 0%, #6a8898 8%, var(--stone-gray) 20%, #686868 50%, var(--stone-dark) 80%, #444 100%);
+  }
+  .depth-3 .grass-strip { opacity: 0; }
+  .depth-3 .dirt-layer { opacity: 0; }
+  .depth-3 .stone-layer { opacity: 0.3; height: 70%; }
+  .depth-3 .coal-vein { opacity: 0.7; }
+  .depth-3 .cloud { opacity: 0; }
+
+  /* Depth 4: Iron Depths - no sky, all stone + iron */
+  body.depth-4 {
+    background: linear-gradient(180deg, #606060 0%, var(--stone-gray) 15%, #6a6a6a 40%, var(--stone-dark) 70%, #484848 100%);
+  }
+  .depth-4 .grass-strip { opacity: 0; }
+  .depth-4 .dirt-layer { opacity: 0; }
+  .depth-4 .stone-layer { opacity: 0.35; height: 80%; }
+  .depth-4 .iron-vein { opacity: 0.8; }
+  .depth-4 .cloud { opacity: 0; }
+
+  /* Depth 5: Gold Cavern - deep stone, golden glow */
+  body.depth-5 {
+    background: linear-gradient(180deg, #555 0%, #4a4a4a 20%, #504830 50%, #4a4020 70%, var(--stone-dark) 100%);
+  }
+  .depth-5 .grass-strip { opacity: 0; }
+  .depth-5 .dirt-layer { opacity: 0; }
+  .depth-5 .stone-layer { opacity: 0.2; height: 90%; }
+  .depth-5 .gold-vein { opacity: 0.9; }
+  .depth-5 .cloud { opacity: 0; }
+
+  /* Depth 6: Diamond Vein - very dark, cyan glow */
+  body.depth-6 {
+    background: linear-gradient(180deg, #404040 0%, #353535 25%, #2a3a40 50%, #253540 75%, #1a2a30 100%);
+  }
+  .depth-6 .grass-strip { opacity: 0; }
+  .depth-6 .dirt-layer { opacity: 0; }
+  .depth-6 .stone-layer { opacity: 0.15; height: 95%; }
+  .depth-6 .diamond-vein { opacity: 0.9; }
+  .depth-6 .cloud { opacity: 0; }
+
+  /* Depth 7: Obsidian Vault - near-black, purple tint */
+  body.depth-7 {
+    background: linear-gradient(180deg, #2a1a3a 0%, #1f1030 25%, #180a28 50%, #120820 75%, #0a0418 100%);
+  }
+  .depth-7 .grass-strip { opacity: 0; }
+  .depth-7 .dirt-layer { opacity: 0; }
+  .depth-7 .stone-layer { opacity: 0.1; height: 100%; }
+  .depth-7 .obsidian-vein { opacity: 0.8; }
+  .depth-7 .cloud { opacity: 0; }
+
+  /* Depth 8: The Nether - red/orange lava glow */
+  body.depth-8 {
+    background: linear-gradient(180deg, #3a0a0a 0%, #501010 15%, #6a1a0a 35%, #802010 55%, #5a1008 75%, #3a0808 100%);
+  }
+  .depth-8 .grass-strip { opacity: 0; }
+  .depth-8 .dirt-layer { opacity: 0; }
+  .depth-8 .stone-layer { opacity: 0; }
+  .depth-8 .lava-layer { opacity: 0.8; }
+  .depth-8 .cloud { opacity: 0; }
+
+  /* Transition for layers */
+  .grass-strip, .dirt-layer, .stone-layer, .ore-vein {
+    transition: opacity 0.8s ease, bottom 0.8s ease, height 0.8s ease;
+  }
+  .cloud {
+    transition: opacity 0.8s ease;
+  }
+</style>
+</head>
+<body>
+
+<!-- Background elements -->
+<div class="mine-bg">
+  <div class="grass-strip"></div>
+  <div class="dirt-layer"></div>
+  <div class="stone-layer"></div>
+  <div class="ore-vein coal-vein"></div>
+  <div class="ore-vein iron-vein"></div>
+  <div class="ore-vein gold-vein"></div>
+  <div class="ore-vein diamond-vein"></div>
+  <div class="ore-vein obsidian-vein"></div>
+  <div class="ore-vein lava-layer"></div>
+</div>
+<!-- Blocky clouds -->
+<div class="cloud cloud1">
+  <span class="cloud-block"></span><span class="cloud-block"></span><span class="cloud-block"></span><span class="cloud-block"></span><br>
+  <span class="cloud-block"></span><span class="cloud-block"></span>
+</div>
+<div class="cloud cloud2">
+  <span class="cloud-block"></span><span class="cloud-block"></span><span class="cloud-block"></span><br>
+  <span class="cloud-block" style="margin-left:16px;"></span>
+</div>
+<div class="cloud cloud3">
+  <span class="cloud-block"></span><span class="cloud-block"></span><span class="cloud-block"></span><span class="cloud-block"></span><span class="cloud-block"></span>
+</div>
+
+<!-- ===== TITLE SCREEN ===== -->
+<div id="title-screen" class="screen">
+  <div class="title-text">
+    Webb's Mine & Read
+    <span class="subtitle">Fight the Mobs with Reading!</span>
+  </div>
+  <div class="title-miner">&#x26CF;&#xFE0F;</div>
+  <button class="menu-btn btn-play" onclick="showLevelSelect()">&#x26CF;&#xFE0F; Play!</button>
+  <button class="menu-btn btn-characters" onclick="showCharacterSelect()">&#x26CF;&#xFE0F; Pick Your Miner</button>
+  <button class="menu-btn btn-leaderboard" onclick="showLeaderboard()">&#x1F3C6; Mine Scoreboard</button>
+</div>
+
+<!-- ===== CHARACTER SELECT ===== -->
+<div id="char-screen" class="screen hidden">
+  <div class="screen-title">Pick Your Miner!</div>
+  <div id="char-grid" class="char-grid"></div>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+    <button class="menu-btn btn-play" onclick="confirmCharacter()">&#x1F44D; Let's Mine!</button>
+    <button class="menu-btn btn-back" onclick="showTitle()">&#x2B05; Back</button>
+  </div>
+</div>
+
+<!-- ===== LEVEL SELECT ===== -->
+<div id="level-screen" class="screen hidden">
+  <div class="screen-title">Choose Your Depth!</div>
+  <div id="level-grid" class="level-grid"></div>
+  <button class="menu-btn btn-back" onclick="showTitle()" style="margin-top:15px;">&#x2B05; Back</button>
+</div>
+
+<!-- ===== LEADERBOARD ===== -->
+<div id="leaderboard-screen" class="screen hidden">
+  <div class="screen-title">&#x1F3C6; Mine Scoreboard</div>
+  <div id="leaderboard-panel" class="leaderboard-panel"></div>
+  <button class="menu-btn btn-back" onclick="showTitle()" style="margin-top:15px;">&#x2B05; Back</button>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div id="game-screen" class="screen hidden">
+  <div class="game-hud">
+    <div class="hud-level" id="hud-level"></div>
+    <div class="hud-progress" id="hud-progress"></div>
+    <div class="hud-score" id="hud-score">0</div>
+    <div class="hud-streak" id="hud-streak"></div>
+    <div class="hud-lives" id="hud-lives"></div>
+  </div>
+  <div class="game-area">
+    <div class="mine-scene">
+      <div>
+        <div class="miner-container" id="miner">
+          <span id="miner-emoji">&#x1F60E;&#x26CF;&#xFE0F;</span>
+        </div>
+        <div class="miner-platform">
+          <span class="platform-block block-grass"></span><span class="platform-block block-grass"></span><span class="platform-block block-grass"></span>
+        </div>
+      </div>
+      <div class="obstacle-container" id="obstacle">
+        <div class="speech-bubble" id="speech-bubble"></div>
+        <span class="obstacle-emoji" id="obstacle-emoji"></span>
+      </div>
+    </div>
+    <div class="question-area">
+      <div class="question-text" id="question-text"></div>
+      <div class="answers-grid" id="answers-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LEVEL COMPLETE ===== -->
+<div id="complete-screen" class="screen hidden">
+  <div class="level-complete-panel">
+    <div class="complete-title" id="complete-title">Level Complete!</div>
+    <div class="complete-score" id="complete-score"></div>
+    <div id="unlock-section"></div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
+      <button class="menu-btn btn-next" id="btn-next-level" onclick="nextLevel()">Dig Deeper &#x26CF;&#xFE0F;</button>
+      <button class="menu-btn btn-play" onclick="replayLevel()">Replay &#x1F504;</button>
+      <button class="menu-btn btn-back" onclick="showTitle()">Menu &#x1F3E0;</button>
+    </div>
+  </div>
+  <div class="confetti-container" id="confetti-container"></div>
+</div>
+
+<!-- ===== GAME OVER ===== -->
+<div id="gameover-screen" class="screen hidden">
+  <div class="gameover-panel">
+    <div class="gameover-title">You Got Mobbed! &#x1F9DF;</div>
+    <div class="gameover-msg" id="gameover-msg"></div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
+      <button class="menu-btn btn-play" onclick="replayLevel()">Try Again &#x1F504;</button>
+      <button class="menu-btn btn-back" onclick="showTitle()">Menu &#x1F3E0;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== SOUND EFFECTS (Web Audio API) =====
+let audioCtx = null;
+let audioUnlocked = false;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') {
+    ctx.resume().then(() => { audioUnlocked = true; });
+  } else {
+    audioUnlocked = true;
+  }
+  const buf = ctx.createBuffer(1, 1, 22050);
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.connect(ctx.destination);
+  src.start(0);
+}
+
+document.addEventListener('touchstart', unlockAudio, { once: false });
+document.addEventListener('touchend', unlockAudio, { once: false });
+document.addEventListener('click', unlockAudio, { once: false });
+
+function playSound(type) {
+  try {
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    switch(type) {
+      case 'correct': {
+        // Block break: sharp click + crumble
+        const click = ctx.createOscillator();
+        const clickGain = ctx.createGain();
+        click.type = 'square';
+        click.frequency.setValueAtTime(1000, ctx.currentTime);
+        click.frequency.linearRampToValueAtTime(400, ctx.currentTime + 0.06);
+        clickGain.gain.setValueAtTime(0.25, ctx.currentTime);
+        clickGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+        click.connect(clickGain).connect(ctx.destination);
+        click.start(ctx.currentTime);
+        click.stop(ctx.currentTime + 0.1);
+
+        // XP ding
+        const ding = ctx.createOscillator();
+        const dingGain = ctx.createGain();
+        ding.type = 'sine';
+        ding.frequency.setValueAtTime(800, ctx.currentTime + 0.08);
+        ding.frequency.linearRampToValueAtTime(1200, ctx.currentTime + 0.2);
+        dingGain.gain.setValueAtTime(0.2, ctx.currentTime + 0.08);
+        dingGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        ding.connect(dingGain).connect(ctx.destination);
+        ding.start(ctx.currentTime + 0.08);
+        ding.stop(ctx.currentTime + 0.5);
+
+        // Crumble noise
+        const bufferSize = ctx.sampleRate * 0.25;
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.4;
+        const noise = ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        const noiseGain = ctx.createGain();
+        const noiseFilter = ctx.createBiquadFilter();
+        noiseFilter.type = 'lowpass';
+        noiseFilter.frequency.value = 1500;
+        noiseGain.gain.setValueAtTime(0.12, ctx.currentTime + 0.05);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+        noise.connect(noiseFilter).connect(noiseGain).connect(ctx.destination);
+        noise.start(ctx.currentTime + 0.05);
+        noise.stop(ctx.currentTime + 0.35);
+        break;
+      }
+      case 'wrong': {
+        // Damage: "oof" thud + hurt sound
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(250, ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(80, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+
+        // Thud noise
+        const bufferSize = ctx.sampleRate * 0.3;
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1);
+        const noise = ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        const noiseGain = ctx.createGain();
+        const noiseFilter = ctx.createBiquadFilter();
+        noiseFilter.type = 'lowpass';
+        noiseFilter.frequency.value = 600;
+        noiseGain.gain.setValueAtTime(0.18, ctx.currentTime);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        noise.connect(noiseFilter).connect(noiseGain).connect(ctx.destination);
+        noise.start(ctx.currentTime);
+        noise.stop(ctx.currentTime + 0.3);
+        break;
+      }
+      case 'levelup': {
+        // XP level up arpeggio
+        const notes = [523, 659, 784, 1047];
+        notes.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.1);
+          gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + i * 0.1 + 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.1 + 0.4);
+          osc.connect(gain).connect(ctx.destination);
+          osc.start(ctx.currentTime + i * 0.1);
+          osc.stop(ctx.currentTime + i * 0.1 + 0.4);
+        });
+        break;
+      }
+      case 'gameover': {
+        const notes = [400, 380, 360, 200];
+        const durations = [0.25, 0.25, 0.25, 0.6];
+        let t = ctx.currentTime;
+        notes.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, t);
+          if (i === 3) osc.frequency.linearRampToValueAtTime(150, t + durations[i]);
+          gain.gain.setValueAtTime(0.2, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + durations[i]);
+          osc.connect(gain).connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + durations[i]);
+          t += durations[i];
+        });
+        break;
+      }
+      case 'canewhack': {
+        const thwack = ctx.createOscillator();
+        const thwackGain = ctx.createGain();
+        thwack.type = 'square';
+        thwack.frequency.setValueAtTime(1200, ctx.currentTime);
+        thwack.frequency.linearRampToValueAtTime(80, ctx.currentTime + 0.08);
+        thwackGain.gain.setValueAtTime(0.25, ctx.currentTime);
+        thwackGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+        thwack.connect(thwackGain).connect(ctx.destination);
+        thwack.start(ctx.currentTime);
+        thwack.stop(ctx.currentTime + 0.12);
+
+        const crackSize = ctx.sampleRate * 0.1;
+        const crackBuf = ctx.createBuffer(1, crackSize, ctx.sampleRate);
+        const crackData = crackBuf.getChannelData(0);
+        for (let i = 0; i < crackSize; i++) crackData[i] = (Math.random() * 2 - 1);
+        const crack = ctx.createBufferSource();
+        crack.buffer = crackBuf;
+        const crackGain = ctx.createGain();
+        const crackFilter = ctx.createBiquadFilter();
+        crackFilter.type = 'highpass';
+        crackFilter.frequency.value = 2000;
+        crackGain.gain.setValueAtTime(0.2, ctx.currentTime);
+        crackGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        crack.connect(crackFilter).connect(crackGain).connect(ctx.destination);
+        crack.start(ctx.currentTime);
+        crack.stop(ctx.currentTime + 0.15);
+
+        const bonk = ctx.createOscillator();
+        const bonkGain = ctx.createGain();
+        bonk.type = 'sine';
+        bonk.frequency.setValueAtTime(600, ctx.currentTime + 0.1);
+        bonk.frequency.linearRampToValueAtTime(200, ctx.currentTime + 0.3);
+        bonkGain.gain.setValueAtTime(0.15, ctx.currentTime + 0.1);
+        bonkGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+        bonk.connect(bonkGain).connect(ctx.destination);
+        bonk.start(ctx.currentTime + 0.1);
+        bonk.stop(ctx.currentTime + 0.35);
+        break;
+      }
+      case 'foodthrow': {
+        const tray = ctx.createOscillator();
+        const trayGain = ctx.createGain();
+        tray.type = 'square';
+        tray.frequency.setValueAtTime(800, ctx.currentTime);
+        tray.frequency.linearRampToValueAtTime(200, ctx.currentTime + 0.15);
+        trayGain.gain.setValueAtTime(0.15, ctx.currentTime);
+        trayGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+        tray.connect(trayGain).connect(ctx.destination);
+        tray.start(ctx.currentTime);
+        tray.stop(ctx.currentTime + 0.2);
+
+        const splatSize = ctx.sampleRate * 0.35;
+        const splatBuf = ctx.createBuffer(1, splatSize, ctx.sampleRate);
+        const splatData = splatBuf.getChannelData(0);
+        for (let i = 0; i < splatSize; i++) splatData[i] = (Math.random() * 2 - 1) * 0.6;
+        const splat = ctx.createBufferSource();
+        splat.buffer = splatBuf;
+        const splatGain = ctx.createGain();
+        const splatFilter = ctx.createBiquadFilter();
+        splatFilter.type = 'lowpass';
+        splatFilter.frequency.value = 1200;
+        splatGain.gain.setValueAtTime(0, ctx.currentTime + 0.1);
+        splatGain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.15);
+        splatGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        splat.connect(splatFilter).connect(splatGain).connect(ctx.destination);
+        splat.start(ctx.currentTime + 0.1);
+        splat.stop(ctx.currentTime + 0.5);
+
+        const boing = ctx.createOscillator();
+        const boingGain = ctx.createGain();
+        boing.type = 'sine';
+        boing.frequency.setValueAtTime(300, ctx.currentTime + 0.2);
+        boing.frequency.linearRampToValueAtTime(900, ctx.currentTime + 0.35);
+        boingGain.gain.setValueAtTime(0.12, ctx.currentTime + 0.2);
+        boingGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.45);
+        boing.connect(boingGain).connect(ctx.destination);
+        boing.start(ctx.currentTime + 0.2);
+        boing.stop(ctx.currentTime + 0.45);
+        break;
+      }
+      case 'click': {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = 600;
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.06);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.06);
+        break;
+      }
+    }
+  } catch(e) {}
+}
+
+// ===== GAME DATA =====
+const CHARACTERS = [
+  { id: 'webb', name: 'Webb', emoji: '😎⛏️', board: '🟦', unlockLevel: 0, quote: "Too cool for the mines! 😎", style: 'cool' },
+  { id: 'wilem', name: 'Wilem', emoji: '⚾⛏️', board: '🟥', unlockLevel: 0, quote: "Catch me if you can! ⚾", style: 'baseball' },
+  { id: 'quinn', name: 'Quinn', emoji: '👸⛏️', board: '🟪', unlockLevel: 0, quote: "Diamond queen! 💎" },
+  { id: 'jackie', name: 'Jackie', emoji: '🐉⛏️', board: '🟩', unlockLevel: 0, quote: "Dragon miner, RAWR! 🔥", style: 'dragon' },
+  { id: 'shai', name: 'Shai', emoji: '🧑⛏️', board: '🟧', unlockLevel: 0, quote: "Shai the block breaker!" },
+  { id: 'twins', name: 'Benj & Sam', emoji: '👦👦⛏️', board: '🟨', unlockLevel: 0, quote: "Twin power!" },
+  { id: 'grandma', name: 'Grandma', emoji: '👵⛏️', board: '🩷', unlockLevel: 0, quote: "Back in MY day...! 🦯", style: 'grandma' },
+  { id: 'lunchlady', name: 'The Hot Lunch Lady', emoji: '🦸‍♀️', board: '⭐', unlockLevel: 8, quote: "EAT YOUR LUNCH! 🍝", style: 'lunchlady' }
+];
+
+const CAFETERIA_FOOD = ['🍝', '🍕', '🌮', '🍔', '🥪', '🍟', '🧁', '🥧', '🍖', '🫘', '🥩', '🍗', '🥔', '🧀', '🥛'];
+
+const LEVELS = [
+  { id: 1, name: 'Dirt Layer', skill: 'vowels', desc: 'Dig for vowels!', emoji: '🟫' },
+  { id: 2, name: 'Stone Layer', skill: 'vocab', desc: 'Word power!', emoji: '🪨' },
+  { id: 3, name: 'Coal Mine', skill: 'sentences', desc: 'Read & understand!', emoji: '⬛' },
+  { id: 4, name: 'Iron Depths', skill: 'synonyms', desc: 'Word connections!', emoji: '🔩' },
+  { id: 5, name: 'Gold Cavern', skill: 'comprehension', desc: 'Read between the lines!', emoji: '🥇' },
+  { id: 6, name: 'Diamond Vein', skill: 'context', desc: 'Context clues!', emoji: '💎' },
+  { id: 7, name: 'Obsidian Vault', skill: 'factopinion', desc: 'Fact or opinion?', emoji: '🟪' },
+  { id: 8, name: 'The Nether', skill: 'sequence', desc: 'Story order!', emoji: '🔥' }
+];
+
+const MOBS = [
+  { emoji: '🧟', name: 'Zombie' },
+  { emoji: '💀', name: 'Skeleton' },
+  { emoji: '🕷️', name: 'Spider' },
+  { emoji: '🟩', name: 'Creeper' },
+  { emoji: '👾', name: 'Enderman' },
+  { emoji: '🟢', name: 'Slime' },
+  { emoji: '🧙', name: 'Witch' },
+  { emoji: '🔥', name: 'Blaze' }
+];
+
+const MOB_TAUNTS = [
+  "Ssssss... BOOM!", "Braaaains!", "I see you mining!",
+  "Nice blocks you got there...", "You can't escape!", "Diamonds are MINE!",
+  "Time to respawn!", "Prepare to be mobbed!", "My cave now!",
+  "You call that a pickaxe?", "Drop your loot!", "No torches can save you!",
+  "This mine is CLOSED!", "Watch your back, miner!", "Night is falling!",
+  "Your inventory is mine!", "I've been here since day one!", "Creeping up on you!",
+  "Say goodbye to your hearts!", "Hostile mob incoming!", "You look lost, miner...",
+  "Tick tick tick... BOOM!", "Better run!", "The darkness is mine!",
+  "No crafting your way out!", "End of the line, miner!"
+];
+
+const CORRECT_MESSAGES = [
+  "Epic Mine! ⛏️", "Block Breaker! 💎", "Critical Hit! ⚔️", "Legendary! ⭐",
+  "Diamond Drop! 💎", "XP Boost! ✨", "Crafted It! 🔨",
+  "Block Smashed! 💥", "Power Mine! ⛏️", "Unstoppable! 🏆"
+];
+
+const LUNCHLADY_MESSAGES = [
+  "ORDER UP! 🍝", "Lunch is SERVED! 🍕", "FOOD FIGHT! 🌮",
+  "Eat THIS! 🍔", "Extra helpings! 🍟", "Kitchen combo! 🧁",
+  "Special of the day! 🍖", "Cafeteria SMASH! 🥧",
+  "Get your trays! 🍗", "Serving heat! 🔥"
+];
+
+const GRANDMA_MESSAGES = [
+  "WHACK! 🦯", "Take THAT, sonny! 👵", "Not today! 🦯",
+  "Grandma says NO! 💥", "Back off! 👵", "Have some cane! 🦯",
+  "Old school! 💪", "Respect your elders! 👵",
+  "Get off my mine! 🦯", "Still got it! 💥"
+];
+
+const CONFETTI_ITEMS = ['⛏️', '💎', '🟫', '⬛', '🟨', '⭐', '🔥', '🗡️', '🛡️', '🏆'];
+
+const LEADERBOARD_DATA = [
+  { name: 'The Hot Lunch Lady', emoji: '🦸‍♀️', score: 9999, quote: "Nobody beats the Lunch Lady!" },
+  { name: 'Shai', emoji: '🧑⛏️', score: 420, quote: "I mined before it was cool" },
+  { name: 'Quinn', emoji: '👸⛏️', score: 380, quote: "Diamond queen forever!" },
+  { name: 'Benj & Sam', emoji: '👦👦⛏️', score: 350, quote: "Twin power activate!" },
+  { name: 'Jackie', emoji: '🐉⛏️', score: 310, quote: "Catch you on the flip side!" },
+  { name: 'Grandma', emoji: '👵⛏️', score: 280, quote: "Back in my day we mined uphill!" },
+  { name: 'Wilem', emoji: '⚾⛏️', score: 250, quote: "Last one in is a noob!" }
+];
+
+// ===== READING QUESTION BANKS =====
+
+// Level 1: Short Vowel Words
+const VOWEL_QUESTIONS = [
+  { text: 'Which word has a short "a" sound?', answer: 'cat', wrongs: ['cake', 'kite', 'rope'] },
+  { text: 'Which word has a short "e" sound?', answer: 'bed', wrongs: ['bead', 'bike', 'boat'] },
+  { text: 'Which word has a short "i" sound?', answer: 'pig', wrongs: ['pie', 'page', 'poke'] },
+  { text: 'Which word has a short "o" sound?', answer: 'hot', wrongs: ['home', 'hike', 'hate'] },
+  { text: 'Which word has a short "u" sound?', answer: 'cup', wrongs: ['cube', 'cape', 'cope'] },
+  { text: 'Which word has a short "a" sound?', answer: 'map', wrongs: ['mope', 'mike', 'mule'] },
+  { text: 'Which word has a short "e" sound?', answer: 'pen', wrongs: ['pine', 'pane', 'pole'] },
+  { text: 'Which word has a short "i" sound?', answer: 'sit', wrongs: ['site', 'suit', 'soot'] },
+  { text: 'Which word has a short "o" sound?', answer: 'log', wrongs: ['lone', 'line', 'lane'] },
+  { text: 'Which word has a short "u" sound?', answer: 'bug', wrongs: ['huge', 'bone', 'bake'] },
+  { text: 'Which word has a short "a" sound?', answer: 'hat', wrongs: ['hate', 'heat', 'hoot'] },
+  { text: 'Which word has a short "e" sound?', answer: 'net', wrongs: ['neat', 'note', 'nine'] },
+  { text: 'Which word has a short "i" sound?', answer: 'fin', wrongs: ['fine', 'fawn', 'fume'] },
+  { text: 'Which word has a short "o" sound?', answer: 'mop', wrongs: ['mope', 'mice', 'mace'] },
+  { text: 'Which word has a short "u" sound?', answer: 'run', wrongs: ['rune', 'rain', 'ripe'] },
+  { text: 'Which word has a short "a" sound?', answer: 'fan', wrongs: ['fawn', 'fine', 'fume'] },
+  { text: 'Which word has a short "e" sound?', answer: 'red', wrongs: ['ride', 'road', 'rude'] },
+  { text: 'Which word has a short "i" sound?', answer: 'lip', wrongs: ['leap', 'loop', 'lope'] },
+  { text: 'Which word has a short "o" sound?', answer: 'box', wrongs: ['bone', 'bane', 'bike'] },
+  { text: 'Which word has a short "u" sound?', answer: 'mud', wrongs: ['mood', 'made', 'mode'] },
+  { text: 'Which word has a short "a" sound?', answer: 'bat', wrongs: ['bite', 'boot', 'beet'] },
+  { text: 'Which word has a short "e" sound?', answer: 'leg', wrongs: ['lug', 'log', 'lag'] }
+];
+
+// Level 4: Vocabulary
+const VOCAB_QUESTIONS = [
+  { text: 'What does "enormous" mean?', answer: 'Very big', wrongs: ['Very small', 'Very fast', 'Very quiet'] },
+  { text: 'What does "tiny" mean?', answer: 'Very small', wrongs: ['Very big', 'Very loud', 'Very slow'] },
+  { text: 'What does "sprint" mean?', answer: 'Run fast', wrongs: ['Walk slow', 'Sit down', 'Stand up'] },
+  { text: 'What does "furious" mean?', answer: 'Very angry', wrongs: ['Very happy', 'Very tired', 'Very sad'] },
+  { text: 'What does "ancient" mean?', answer: 'Very old', wrongs: ['Very new', 'Very big', 'Very small'] },
+  { text: 'What does "brave" mean?', answer: 'Not afraid', wrongs: ['Very tired', 'Very sad', 'Very lost'] },
+  { text: 'What does "chilly" mean?', answer: 'A bit cold', wrongs: ['Very hot', 'Very loud', 'Very dark'] },
+  { text: 'What does "gloomy" mean?', answer: 'Dark and sad', wrongs: ['Bright', 'Funny', 'Loud'] },
+  { text: 'What does "delicious" mean?', answer: 'Tastes great', wrongs: ['Looks bad', 'Smells bad', 'Feels rough'] },
+  { text: 'What does "terrified" mean?', answer: 'Very scared', wrongs: ['Very happy', 'Very bored', 'Very calm'] },
+  { text: 'What does "exhausted" mean?', answer: 'Very tired', wrongs: ['Very hungry', 'Very cold', 'Very strong'] },
+  { text: 'What does "gigantic" mean?', answer: 'Really huge', wrongs: ['Really tiny', 'Really fast', 'Really dark'] },
+  { text: 'What does "whisper" mean?', answer: 'Talk softly', wrongs: ['Yell loud', 'Run fast', 'Jump high'] },
+  { text: 'What does "shove" mean?', answer: 'Push hard', wrongs: ['Pull soft', 'Sit down', 'Look up'] },
+  { text: 'What does "peek" mean?', answer: 'Quick look', wrongs: ['Long nap', 'Big jump', 'Loud yell'] },
+  { text: 'What does "damp" mean?', answer: 'A bit wet', wrongs: ['Very dry', 'Super hot', 'Really old'] },
+  { text: 'What does "gobble" mean?', answer: 'Eat fast', wrongs: ['Walk slow', 'Sleep long', 'Talk soft'] },
+  { text: 'What does "trudge" mean?', answer: 'Walk slowly', wrongs: ['Run fast', 'Fly high', 'Swim deep'] },
+  { text: 'What does "eager" mean?', answer: 'Excited to do', wrongs: ['Scared of', 'Bored by', 'Mad about'] },
+  { text: 'What does "snatch" mean?', answer: 'Grab quickly', wrongs: ['Drop slowly', 'Push away', 'Sit still'] },
+  { text: 'What does "drowsy" mean?', answer: 'Feeling sleepy', wrongs: ['Feeling happy', 'Feeling full', 'Feeling cold'] },
+  { text: 'What does "shatter" mean?', answer: 'Break apart', wrongs: ['Stick together', 'Float up', 'Melt down'] }
+];
+
+// Level 5: Sentence Comprehension
+const SENTENCE_QUESTIONS = [
+  { text: 'The dog ran to the park.\nWhere did the dog go?', answer: 'The park', wrongs: ['The store', 'School', 'Home'] },
+  { text: 'Mom baked cookies.\nWhat did Mom make?', answer: 'Cookies', wrongs: ['Cake', 'Bread', 'Pizza'] },
+  { text: 'The cat sat on the mat.\nWhere is the cat?', answer: 'On the mat', wrongs: ['Under a bed', 'In a tree', 'On a chair'] },
+  { text: 'Dad drove us to school.\nHow did they get there?', answer: 'By car', wrongs: ['By bus', 'Walking', 'By bike'] },
+  { text: 'We played outside after lunch.\nWhen did they play?', answer: 'After lunch', wrongs: ['Before bed', 'At night', 'In the morning'] },
+  { text: 'She wore a red coat.\nWhat color was the coat?', answer: 'Red', wrongs: ['Blue', 'Green', 'Yellow'] },
+  { text: 'The bird flew to its nest.\nWhere did the bird go?', answer: 'Its nest', wrongs: ['The pond', 'The park', 'The house'] },
+  { text: 'He ate three apples.\nHow many apples?', answer: 'Three', wrongs: ['One', 'Two', 'Four'] },
+  { text: 'The frog jumped into the pond.\nWhat did the frog do?', answer: 'Jumped', wrongs: ['Slept', 'Ate', 'Sang'] },
+  { text: 'They played soccer at the field.\nWhat sport did they play?', answer: 'Soccer', wrongs: ['Baseball', 'Tennis', 'Swimming'] },
+  { text: 'She read her book before bed.\nWhen did she read?', answer: 'Before bed', wrongs: ['At lunch', 'In class', 'After school'] },
+  { text: 'The boy gave flowers to his mom.\nWho got the flowers?', answer: 'His mom', wrongs: ['His dad', 'His dog', 'His friend'] },
+  { text: 'It was too cold to swim.\nWhy couldn\'t they swim?', answer: 'Too cold', wrongs: ['Too dark', 'Too late', 'Too far'] },
+  { text: 'The girls sang a happy song.\nHow did the song sound?', answer: 'Happy', wrongs: ['Sad', 'Scary', 'Quiet'] },
+  { text: 'We need milk from the store.\nWhat do they need?', answer: 'Milk', wrongs: ['Bread', 'Eggs', 'Juice'] },
+  { text: 'He found a shell at the beach.\nWhere was the shell?', answer: 'At the beach', wrongs: ['In the yard', 'At school', 'In the woods'] },
+  { text: 'She walked her dog every morning.\nWhen does she walk?', answer: 'Every morning', wrongs: ['Every night', 'After lunch', 'On weekends'] },
+  { text: 'The baby cried because she was hungry.\nWhy did the baby cry?', answer: 'She was hungry', wrongs: ['She was cold', 'She was lost', 'She was bored'] },
+  { text: 'Tom shared his snack with his friend.\nWhat did Tom share?', answer: 'His snack', wrongs: ['His toy', 'His book', 'His bike'] },
+  { text: 'The sun went down and the stars came out.\nWhat time of day?', answer: 'Nighttime', wrongs: ['Morning', 'Noon', 'Afternoon'] }
+];
+
+// Level 6: Synonyms & Antonyms
+const SYNONYM_QUESTIONS = [
+  { text: 'Which word means the same as "happy"?', answer: 'Glad', wrongs: ['Sad', 'Mad', 'Tired'] },
+  { text: 'Which word means the same as "big"?', answer: 'Large', wrongs: ['Small', 'Short', 'Thin'] },
+  { text: 'Which word means the same as "fast"?', answer: 'Quick', wrongs: ['Slow', 'Heavy', 'Soft'] },
+  { text: 'Which word means the opposite of "hot"?', answer: 'Cold', wrongs: ['Warm', 'Dry', 'Soft'] },
+  { text: 'Which word means the opposite of "big"?', answer: 'Small', wrongs: ['Tall', 'Wide', 'Heavy'] },
+  { text: 'Which word means the same as "scared"?', answer: 'Afraid', wrongs: ['Brave', 'Calm', 'Strong'] },
+  { text: 'Which word means the opposite of "up"?', answer: 'Down', wrongs: ['Over', 'Left', 'Near'] },
+  { text: 'Which word means the same as "pretty"?', answer: 'Beautiful', wrongs: ['Ugly', 'Plain', 'Dark'] },
+  { text: 'Which word means the opposite of "quiet"?', answer: 'Loud', wrongs: ['Soft', 'Still', 'Slow'] },
+  { text: 'Which word means the same as "begin"?', answer: 'Start', wrongs: ['End', 'Stop', 'Rest'] },
+  { text: 'Which word means the opposite of "hard"?', answer: 'Soft', wrongs: ['Rough', 'Thick', 'Dark'] },
+  { text: 'Which word means the same as "sick"?', answer: 'Ill', wrongs: ['Well', 'Fine', 'Great'] },
+  { text: 'Which word means the opposite of "old"?', answer: 'Young', wrongs: ['Tall', 'Big', 'Rich'] },
+  { text: 'Which word means the same as "fix"?', answer: 'Repair', wrongs: ['Break', 'Toss', 'Hide'] },
+  { text: 'Which word means the opposite of "open"?', answer: 'Closed', wrongs: ['Wide', 'Tall', 'Round'] },
+  { text: 'Which word means the same as "jump"?', answer: 'Leap', wrongs: ['Crawl', 'Sit', 'Sleep'] },
+  { text: 'Which word means the opposite of "dark"?', answer: 'Light', wrongs: ['Black', 'Deep', 'Thick'] },
+  { text: 'Which word means the same as "toss"?', answer: 'Throw', wrongs: ['Catch', 'Hold', 'Drop'] },
+  { text: 'Which word means the opposite of "night"?', answer: 'Day', wrongs: ['Moon', 'Star', 'Dark'] },
+  { text: 'Which word means the same as "glad"?', answer: 'Happy', wrongs: ['Angry', 'Tired', 'Bored'] },
+  { text: 'Which word means the opposite of "full"?', answer: 'Empty', wrongs: ['Heavy', 'Round', 'Tall'] },
+  { text: 'Which word means the same as "yell"?', answer: 'Shout', wrongs: ['Whisper', 'Hum', 'Sing'] }
+];
+
+// Level 7: Advanced Comprehension
+const COMPREHENSION_QUESTIONS = [
+  { text: 'Sam put on boots and grabbed an umbrella.\nWhat is the weather?', answer: 'Rainy', wrongs: ['Sunny', 'Snowy', 'Windy'] },
+  { text: 'The cat hissed and puffed up its fur.\nHow does the cat feel?', answer: 'Scared or angry', wrongs: ['Happy', 'Sleepy', 'Hungry'] },
+  { text: 'Lily blew out the candles on her cake.\nWhat is happening?', answer: 'A birthday party', wrongs: ['Dinner time', 'Bedtime', 'A campfire'] },
+  { text: 'He yawned and rubbed his eyes.\nWhat does he need?', answer: 'Sleep', wrongs: ['Food', 'Water', 'A toy'] },
+  { text: 'She put on sunscreen and packed a towel.\nWhere is she going?', answer: 'The beach', wrongs: ['The store', 'School', 'The library'] },
+  { text: 'The leaves turned red and fell down.\nWhat season is it?', answer: 'Fall', wrongs: ['Spring', 'Summer', 'Winter'] },
+  { text: 'He put on a helmet and got on his bike.\nWhat will he do?', answer: 'Ride his bike', wrongs: ['Go swimming', 'Play soccer', 'Read a book'] },
+  { text: 'Everyone clapped when she finished her song.\nHow did they feel?', answer: 'They liked it', wrongs: ['They were sad', 'They were bored', 'They were mad'] },
+  { text: 'The dog wagged its tail when Dad came home.\nHow does the dog feel?', answer: 'Happy and excited', wrongs: ['Scared', 'Sick', 'Tired'] },
+  { text: 'She counted her coins and walked to the ice cream truck.\nWhat will she do?', answer: 'Buy ice cream', wrongs: ['Go to school', 'Walk the dog', 'Play a game'] },
+  { text: 'Snow covered everything outside. Schools were closed.\nWhy were schools closed?', answer: 'Too much snow', wrongs: ['It was summer', 'A holiday', 'The weekend'] },
+  { text: 'He heard his stomach growl during class.\nWhat does he need?', answer: 'Food', wrongs: ['Sleep', 'Water', 'A friend'] },
+  { text: 'She picked flowers and put them in a vase.\nWhat did she make?', answer: 'A bouquet', wrongs: ['A cake', 'A drawing', 'A fort'] },
+  { text: 'The ground was white and the air was freezing.\nWhat season is it?', answer: 'Winter', wrongs: ['Spring', 'Summer', 'Fall'] },
+  { text: 'Mom packed lunches and filled the water bottles.\nWhat are they getting ready for?', answer: 'A trip or outing', wrongs: ['Bedtime', 'A bath', 'Watching TV'] },
+  { text: 'He saw dark clouds and heard a loud boom.\nWhat is coming?', answer: 'A storm', wrongs: ['A parade', 'A plane', 'Fireworks'] },
+  { text: 'She tied her laces and stretched her legs.\nWhat will she do?', answer: 'Go running', wrongs: ['Go to sleep', 'Eat dinner', 'Watch TV'] },
+  { text: 'The baby smiled and reached for the toy.\nHow does the baby feel?', answer: 'Happy', wrongs: ['Scared', 'Tired', 'Sick'] },
+  { text: 'He wore a costume and carried a bag.\nWhat night is it?', answer: 'Halloween', wrongs: ['Christmas', 'His birthday', 'New Year'] },
+  { text: 'The flowers were blooming and birds were singing.\nWhat season is it?', answer: 'Spring', wrongs: ['Winter', 'Fall', 'None'] }
+];
+
+// Level 6: Context Clues
+const CONTEXT_CLUES_QUESTIONS = [
+  { text: 'The dog was so famished that it ate three bowls of food.\nWhat does "famished" mean?', answer: 'Very hungry', wrongs: ['Very tired', 'Very happy', 'Very angry'] },
+  { text: 'She sprinted to the bus stop so she wouldn\'t be late.\nWhat does "sprinted" mean?', answer: 'Ran fast', wrongs: ['Walked slowly', 'Sat down', 'Fell asleep'] },
+  { text: 'The enormous elephant was the biggest animal at the zoo.\nWhat does "enormous" mean?', answer: 'Very big', wrongs: ['Very small', 'Very fast', 'Very loud'] },
+  { text: 'He was so parched after running that he drank two glasses of water.\nWhat does "parched" mean?', answer: 'Very thirsty', wrongs: ['Very full', 'Very cold', 'Very happy'] },
+  { text: 'The timid rabbit hid behind the bush when it heard a loud noise.\nWhat does "timid" mean?', answer: 'Shy or scared', wrongs: ['Brave', 'Angry', 'Sleepy'] },
+  { text: 'She was elated when she won first place in the race.\nWhat does "elated" mean?', answer: 'Very happy', wrongs: ['Very sad', 'Very tired', 'Very scared'] },
+  { text: 'The frigid wind made everyone put on their coats.\nWhat does "frigid" mean?', answer: 'Very cold', wrongs: ['Very hot', 'Very soft', 'Very loud'] },
+  { text: 'The peculiar noise sounded strange and different.\nWhat does "peculiar" mean?', answer: 'Odd or weird', wrongs: ['Normal', 'Loud', 'Quiet'] },
+  { text: 'He devoured his dinner because he was so hungry.\nWhat does "devoured" mean?', answer: 'Ate quickly', wrongs: ['Cooked slowly', 'Threw away', 'Looked at'] },
+  { text: 'The luminous stars lit up the dark night sky.\nWhat does "luminous" mean?', answer: 'Bright and glowing', wrongs: ['Dark', 'Tiny', 'Noisy'] },
+  { text: 'She was furious when someone broke her favorite toy.\nWhat does "furious" mean?', answer: 'Very angry', wrongs: ['Very happy', 'Very quiet', 'Very bored'] },
+  { text: 'The slender cat squeezed through the tiny gap in the fence.\nWhat does "slender" mean?', answer: 'Thin', wrongs: ['Fat', 'Tall', 'Short'] },
+  { text: 'He was exhausted after playing soccer for two hours.\nWhat does "exhausted" mean?', answer: 'Very tired', wrongs: ['Very hungry', 'Very excited', 'Very cold'] },
+  { text: 'The ancient castle was built hundreds of years ago.\nWhat does "ancient" mean?', answer: 'Very old', wrongs: ['Very new', 'Very big', 'Very pretty'] },
+  { text: 'She was drenched after playing in the rain without an umbrella.\nWhat does "drenched" mean?', answer: 'Soaking wet', wrongs: ['Very dry', 'Very warm', 'Very clean'] },
+  { text: 'The fragile glass broke when it fell off the table.\nWhat does "fragile" mean?', answer: 'Easy to break', wrongs: ['Very strong', 'Very heavy', 'Very old'] },
+  { text: 'He whispered a secret so nobody else could hear.\nWhat does "whispered" mean?', answer: 'Spoke very softly', wrongs: ['Yelled loudly', 'Sang a song', 'Wrote a note'] },
+  { text: 'The scorching sun made the sand too hot to walk on.\nWhat does "scorching" mean?', answer: 'Extremely hot', wrongs: ['Freezing cold', 'Very wet', 'Very dark'] },
+  { text: 'She was drowsy after staying up too late and kept yawning.\nWhat does "drowsy" mean?', answer: 'Sleepy', wrongs: ['Hungry', 'Excited', 'Angry'] },
+  { text: 'The courageous firefighter ran into the burning building.\nWhat does "courageous" mean?', answer: 'Very brave', wrongs: ['Very scared', 'Very fast', 'Very tall'] },
+  { text: 'The melody was so soothing that the baby fell asleep.\nWhat does "soothing" mean?', answer: 'Calming', wrongs: ['Loud', 'Scary', 'Exciting'] },
+  { text: 'He concealed the present behind his back so she couldn\'t see it.\nWhat does "concealed" mean?', answer: 'Hid', wrongs: ['Opened', 'Dropped', 'Broke'] }
+];
+
+// Level 7: Fact vs. Opinion
+const FACT_OPINION_QUESTIONS = [
+  { text: 'Which one is a FACT?', answer: 'Dogs have four legs', wrongs: ['Dogs are the best pets', 'Dogs are cuter than cats', 'Dogs are boring'] },
+  { text: 'Which one is an OPINION?', answer: 'Pizza is the best food', wrongs: ['Pizza is made with dough', 'Pizza can have cheese', 'Pizza is baked in an oven'] },
+  { text: 'Which one is a FACT?', answer: 'Fish live in water', wrongs: ['Fish are fun to watch', 'Fish are ugly', 'Fish are the best pets'] },
+  { text: 'Which one is an OPINION?', answer: 'Math is the hardest subject', wrongs: ['Math uses numbers', 'You can add and subtract', '2 + 2 = 4'] },
+  { text: 'Which one is a FACT?', answer: 'The sun gives us light', wrongs: ['Sunsets are beautiful', 'Summer is the best season', 'Sunny days are more fun'] },
+  { text: 'Which one is an OPINION?', answer: 'Chocolate is delicious', wrongs: ['Chocolate is made from cocoa', 'Chocolate can be dark or milk', 'Chocolate melts in heat'] },
+  { text: 'Which one is a FACT?', answer: 'Ice cream is cold', wrongs: ['Ice cream is yummy', 'Vanilla is the best flavor', 'Ice cream is better than cake'] },
+  { text: 'Which one is an OPINION?', answer: 'Cats are better than dogs', wrongs: ['Cats have whiskers', 'Cats can purr', 'Some cats are orange'] },
+  { text: 'Which one is a FACT?', answer: 'Birds have feathers', wrongs: ['Birds are pretty', 'Birds sing the best songs', 'Parrots are the coolest birds'] },
+  { text: 'Which one is an OPINION?', answer: 'Red is the prettiest color', wrongs: ['Red is a color', 'Stop signs are red', 'Fire trucks are red'] },
+  { text: 'Which one is a FACT?', answer: 'The Earth goes around the Sun', wrongs: ['Space is scary', 'Stars are beautiful', 'The moon is cool'] },
+  { text: 'Which one is an OPINION?', answer: 'Recess is the best part of school', wrongs: ['Recess is a break from class', 'Kids play at recess', 'Recess is usually outside'] },
+  { text: 'Which one is a FACT?', answer: 'A triangle has three sides', wrongs: ['Triangles look weird', 'Circles are better', 'Squares are boring'] },
+  { text: 'Which one is an OPINION?', answer: 'Winter is the worst season', wrongs: ['It snows in winter', 'Winter days are shorter', 'Winter comes after fall'] },
+  { text: 'Which one is a FACT?', answer: 'Spiders have eight legs', wrongs: ['Spiders are gross', 'Spiders are scary', 'Spiders are mean'] },
+  { text: 'Which one is an OPINION?', answer: 'Swimming is more fun than running', wrongs: ['Swimming is done in water', 'Swimmers wear swimsuits', 'Pools have water in them'] },
+  { text: 'Which one is a FACT?', answer: 'There are 7 days in a week', wrongs: ['Mondays are the worst', 'Weekends are too short', 'Friday is the best day'] },
+  { text: 'Which one is an OPINION?', answer: 'Broccoli tastes bad', wrongs: ['Broccoli is a vegetable', 'Broccoli is green', 'Broccoli grows on a plant'] },
+  { text: 'Which one is a FACT?', answer: 'Water freezes at 32°F', wrongs: ['Cold water tastes better', 'Ice is fun to play with', 'Winter is too cold'] },
+  { text: 'Which one is an OPINION?', answer: 'Books are boring', wrongs: ['Books have pages', 'Books have words in them', 'Libraries have books'] },
+  { text: 'Which one is a FACT?', answer: 'Apples grow on trees', wrongs: ['Apples are the best fruit', 'Green apples are gross', 'Apples taste amazing'] },
+  { text: 'Which one is an OPINION?', answer: 'Soccer is the best sport', wrongs: ['Soccer uses a ball', 'Soccer has two teams', 'A soccer field is big'] }
+];
+
+// Level 8: Story Order / Sequencing
+const SEQUENCE_QUESTIONS = [
+  { text: 'First, Lily put on her shoes. Then she walked to school. Finally, she sat at her desk.\nWhat did Lily do FIRST?', answer: 'Put on her shoes', wrongs: ['Walked to school', 'Sat at her desk', 'Ate breakfast'] },
+  { text: 'First, Tom woke up. Then he brushed his teeth. Finally, he ate breakfast.\nWhat did Tom do LAST?', answer: 'Ate breakfast', wrongs: ['Woke up', 'Brushed his teeth', 'Got dressed'] },
+  { text: 'First, she mixed the batter. Then she put it in the oven. Finally, she frosted the cake.\nWhat happened SECOND?', answer: 'Put it in the oven', wrongs: ['Mixed the batter', 'Frosted the cake', 'Ate the cake'] },
+  { text: 'First, the seed was planted. Then it grew into a sprout. Finally, it became a flower.\nWhat happened FIRST?', answer: 'Seed was planted', wrongs: ['It grew a sprout', 'It became a flower', 'It was watered'] },
+  { text: 'First, he got a book. Then he sat in his chair. Finally, he started reading.\nWhat did he do LAST?', answer: 'Started reading', wrongs: ['Got a book', 'Sat in his chair', 'Went to the library'] },
+  { text: 'First, she filled the tub. Then she got in. Finally, she washed her hair.\nWhat happened SECOND?', answer: 'She got in', wrongs: ['Filled the tub', 'Washed her hair', 'Dried off'] },
+  { text: 'First, Dad got the leash. Then he called the dog. Finally, they went for a walk.\nWhat happened FIRST?', answer: 'Dad got the leash', wrongs: ['Called the dog', 'Went for a walk', 'Fed the dog'] },
+  { text: 'First, she picked up the phone. Then she dialed the number. Finally, she talked to Grandma.\nWhat did she do LAST?', answer: 'Talked to Grandma', wrongs: ['Picked up the phone', 'Dialed the number', 'Hung up'] },
+  { text: 'First, he found a stick. Then he threw it. Finally, the dog brought it back.\nWhat happened SECOND?', answer: 'He threw it', wrongs: ['Found a stick', 'Dog brought it back', 'He ran away'] },
+  { text: 'First, it started raining. Then she grabbed her umbrella. Finally, she walked outside.\nWhat happened FIRST?', answer: 'It started raining', wrongs: ['Grabbed umbrella', 'Walked outside', 'Put on boots'] },
+  { text: 'First, Mom cut the bread. Then she added peanut butter. Finally, she put the sandwich in a bag.\nWhat happened SECOND?', answer: 'Added peanut butter', wrongs: ['Cut the bread', 'Put it in a bag', 'Ate the sandwich'] },
+  { text: 'First, he put on his helmet. Then he got on his bike. Finally, he rode to the park.\nWhat did he do FIRST?', answer: 'Put on his helmet', wrongs: ['Got on his bike', 'Rode to the park', 'Came home'] },
+  { text: 'First, she opened the box. Then she saw a puppy inside. Finally, she hugged the puppy.\nWhat did she do LAST?', answer: 'Hugged the puppy', wrongs: ['Opened the box', 'Saw the puppy', 'Named the puppy'] },
+  { text: 'First, the snow fell. Then the kids built a snowman. Finally, they went inside for hot cocoa.\nWhat happened SECOND?', answer: 'Built a snowman', wrongs: ['Snow fell', 'Went inside', 'Drank hot cocoa'] },
+  { text: 'First, she got paper. Then she drew a picture. Finally, she hung it on the fridge.\nWhat happened FIRST?', answer: 'She got paper', wrongs: ['Drew a picture', 'Hung it up', 'Got crayons'] },
+  { text: 'First, he cracked the eggs. Then he stirred them in a bowl. Finally, he cooked them in a pan.\nWhat happened LAST?', answer: 'Cooked them in a pan', wrongs: ['Cracked the eggs', 'Stirred them', 'Ate them'] },
+  { text: 'First, they packed the car. Then they drove to the beach. Finally, they set up their towels.\nWhat happened SECOND?', answer: 'Drove to the beach', wrongs: ['Packed the car', 'Set up towels', 'Went swimming'] },
+  { text: 'First, she turned off the light. Then she got into bed. Finally, she fell asleep.\nWhat did she do FIRST?', answer: 'Turned off the light', wrongs: ['Got into bed', 'Fell asleep', 'Brushed her teeth'] },
+  { text: 'First, he dug a hole. Then he dropped in a seed. Finally, he covered it with dirt.\nWhat happened SECOND?', answer: 'Dropped in a seed', wrongs: ['Dug a hole', 'Covered with dirt', 'Watered it'] },
+  { text: 'First, she washed the apple. Then she cut it into slices. Finally, she ate the slices.\nWhat happened LAST?', answer: 'Ate the slices', wrongs: ['Washed the apple', 'Cut it into slices', 'Got a plate'] },
+  { text: 'First, they bought tickets. Then they found their seats. Finally, the movie started.\nWhat happened FIRST?', answer: 'Bought tickets', wrongs: ['Found their seats', 'Movie started', 'Got popcorn'] },
+  { text: 'First, he put soap on the sponge. Then he scrubbed the dish. Finally, he rinsed it with water.\nWhat happened SECOND?', answer: 'Scrubbed the dish', wrongs: ['Put soap on sponge', 'Rinsed with water', 'Dried the dish'] }
+];
+
+const ALL_QUESTION_BANKS = [
+  VOWEL_QUESTIONS,
+  VOCAB_QUESTIONS,
+  SENTENCE_QUESTIONS,
+  SYNONYM_QUESTIONS,
+  COMPREHENSION_QUESTIONS,
+  CONTEXT_CLUES_QUESTIONS,
+  FACT_OPINION_QUESTIONS,
+  SEQUENCE_QUESTIONS
+];
+
+// ===== GAME STATE =====
+let state = {
+  selectedChar: 'webb',
+  currentLevel: 0,
+  score: 0,
+  totalScore: 0,
+  streak: 0,
+  lives: 3,
+  correctCount: 0,
+  unlockedChars: ['webb', 'wilem', 'quinn', 'jackie', 'shai', 'twins', 'grandma'],
+  completedLevels: [],
+  highScore: 0,
+  answering: false,
+  usedQuestions: []
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('webbMineRead');
+    if (saved) {
+      const s = JSON.parse(saved);
+      state.unlockedChars = s.unlockedChars || ['webb', 'wilem', 'quinn', 'jackie', 'shai', 'twins', 'grandma'];
+      state.completedLevels = s.completedLevels || [];
+      state.selectedChar = s.selectedChar || 'webb';
+      state.highScore = s.highScore || 0;
+      state.totalScore = s.totalScore || 0;
+    }
+  } catch(e) {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('webbMineRead', JSON.stringify({
+      unlockedChars: state.unlockedChars,
+      completedLevels: state.completedLevels,
+      selectedChar: state.selectedChar,
+      highScore: state.highScore,
+      totalScore: state.totalScore
+    }));
+  } catch(e) {}
+}
+
+// ===== SCREEN MANAGEMENT =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function showTitle() { resetDepth(); showScreen('title-screen'); }
+
+function showCharacterSelect() {
+  showScreen('char-screen');
+  renderCharacters();
+}
+
+function showLevelSelect() {
+  showScreen('level-screen');
+  renderLevels();
+}
+
+function showLeaderboard() {
+  showScreen('leaderboard-screen');
+  renderLeaderboard();
+}
+
+// ===== CHARACTER SELECT =====
+function renderCharacters() {
+  const grid = document.getElementById('char-grid');
+  grid.innerHTML = '';
+  CHARACTERS.forEach(c => {
+    const unlocked = state.unlockedChars.includes(c.id);
+    const selected = state.selectedChar === c.id;
+    const card = document.createElement('div');
+    card.className = 'char-card' + (selected ? ' selected' : '') + (!unlocked ? ' locked' : '');
+    if (unlocked) {
+      card.onclick = () => { state.selectedChar = c.id; renderCharacters(); };
+    }
+    card.innerHTML = unlocked
+      ? `<div class="char-emoji">${c.emoji}</div>
+         <div class="char-name">${c.name}</div>
+         <div class="char-board">${c.board} ${c.board} ${c.board}</div>`
+      : `<div class="char-emoji">&#x2753;</div>
+         <div class="char-name">${c.name}</div>
+         <div class="lock-icon">&#x1F512;</div>
+         <div class="char-board" style="font-size:9px;">Beat Level ${c.unlockLevel}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+function confirmCharacter() {
+  saveState();
+  showTitle();
+}
+
+// ===== LEVEL SELECT =====
+function renderLevels() {
+  const grid = document.getElementById('level-grid');
+  grid.innerHTML = '';
+  LEVELS.forEach((lvl, i) => {
+    const unlocked = i === 0 || state.completedLevels.includes(i);
+    const completed = state.completedLevels.includes(lvl.id);
+    const card = document.createElement('div');
+    card.className = 'level-card' + (!unlocked ? ' locked' : '') + (completed ? ' completed' : '');
+    if (unlocked) {
+      card.onclick = () => startLevel(i);
+    }
+    card.innerHTML = `
+      <div class="level-num">${lvl.emoji} ${lvl.id}</div>
+      <div class="level-name">${lvl.name}</div>
+      <div class="level-desc">${lvl.desc}</div>
+      ${completed ? '<div style="color:#4caf50;font-size:20px;margin-top:4px;">&#x2705;</div>' : ''}
+      ${!unlocked ? '<div style="font-size:20px;margin-top:4px;">&#x1F512;</div>' : ''}
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ===== LEADERBOARD =====
+function renderLeaderboard() {
+  const panel = document.getElementById('leaderboard-panel');
+  const entries = [...LEADERBOARD_DATA];
+  const webbEntry = { name: 'Webb ⬅️ YOU', emoji: '😎⛏️', score: state.totalScore, quote: "That's me!", isPlayer: true };
+
+  entries.push(webbEntry);
+  entries.sort((a, b) => b.score - a.score);
+
+  panel.innerHTML = '<div class="leaderboard-title">&#x1F3C6; Mine Scoreboard &#x1F3C6;</div>';
+  entries.forEach((e, i) => {
+    const row = document.createElement('div');
+    row.className = 'lb-row' + (e.isPlayer ? ' player-row' : '');
+    row.innerHTML = `
+      <div class="lb-rank">#${i + 1}</div>
+      <div class="lb-avatar">${e.emoji}</div>
+      <div class="lb-info">
+        <div class="lb-name">${e.name}</div>
+        <div class="lb-quote">"${e.quote}"</div>
+      </div>
+      <div class="lb-score">${e.score}</div>
+    `;
+    panel.appendChild(row);
+  });
+}
+
+// ===== READING QUESTION GENERATION =====
+function generateReadingQuestion(level) {
+  const bank = ALL_QUESTION_BANKS[level];
+  // Filter out recently used questions to avoid repeats
+  let available = bank.filter((_, i) => !state.usedQuestions.includes(i));
+  if (available.length === 0) {
+    state.usedQuestions = [];
+    available = bank;
+  }
+
+  const idx = Math.floor(Math.random() * available.length);
+  const q = available[idx];
+  const originalIdx = bank.indexOf(q);
+  state.usedQuestions.push(originalIdx);
+
+  const choices = shuffle([q.answer, ...q.wrongs]);
+  return { text: q.text, answer: q.answer, choices };
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ===== DEPTH BACKGROUND =====
+const DEPTH_PLATFORMS = [
+  // Level 1: Dirt - grass blocks
+  { colors: ['linear-gradient(180deg, #7ec850 30%, #8b6914 30%)', 'linear-gradient(180deg, #7ec850 30%, #8b6914 30%)', 'linear-gradient(180deg, #7ec850 30%, #8b6914 30%)'] },
+  // Level 2: Stone - dirt blocks
+  { colors: ['#8b6914', '#6b4c12', '#8b6914'] },
+  // Level 3: Coal - stone blocks
+  { colors: ['#7f7f7f', '#6a6a6a', '#7f7f7f'] },
+  // Level 4: Iron - stone blocks with iron tint
+  { colors: ['#7f7f7f', '#8a8070', '#7f7f7f'] },
+  // Level 5: Gold - dark stone blocks
+  { colors: ['#5a5a5a', '#504830', '#5a5a5a'] },
+  // Level 6: Diamond - dark stone blocks
+  { colors: ['#404040', '#354048', '#404040'] },
+  // Level 7: Obsidian - dark purple blocks
+  { colors: ['#1f1030', '#2a1a3a', '#1f1030'] },
+  // Level 8: Nether - nether rack blocks
+  { colors: ['#6a1a0a', '#802010', '#6a1a0a'] }
+];
+
+function setLevelDepth(levelIndex) {
+  // Remove all depth classes
+  document.body.className = '';
+  // Add the depth class (1-indexed)
+  document.body.classList.add('depth-' + (levelIndex + 1));
+
+  // Update platform blocks
+  const platformBlocks = document.querySelectorAll('.platform-block');
+  const platform = DEPTH_PLATFORMS[levelIndex];
+  platformBlocks.forEach((block, i) => {
+    block.className = 'platform-block';
+    const color = platform.colors[i % platform.colors.length];
+    if (color.includes('gradient')) {
+      block.style.background = color;
+    } else {
+      block.style.background = color;
+    }
+  });
+}
+
+function resetDepth() {
+  document.body.className = '';
+  // Reset platform blocks to grass
+  const platformBlocks = document.querySelectorAll('.platform-block');
+  platformBlocks.forEach(block => {
+    block.className = 'platform-block block-grass';
+    block.style.background = '';
+  });
+}
+
+// ===== GAMEPLAY =====
+let currentQuestion = null;
+
+function startLevel(levelIndex) {
+  state.currentLevel = levelIndex;
+  state.score = 0;
+  state.streak = 0;
+  state.lives = 3;
+  state.correctCount = 0;
+  state.answering = false;
+  state.usedQuestions = [];
+
+  const char = CHARACTERS.find(c => c.id === state.selectedChar);
+  document.getElementById('miner-emoji').textContent = char.emoji;
+
+  setLevelDepth(levelIndex);
+  showScreen('game-screen');
+  updateHUD();
+  nextQuestion();
+}
+
+function updateHUD() {
+  const lvl = LEVELS[state.currentLevel];
+  document.getElementById('hud-level').textContent = `${lvl.emoji} ${lvl.name}`;
+  document.getElementById('hud-score').textContent = `\u2B50 ${state.score}`;
+  document.getElementById('hud-progress').textContent = `${state.correctCount}/5 blocks`;
+
+  const streakText = state.streak >= 2 ? `\uD83D\uDD25 x${state.streak}` : '';
+  document.getElementById('hud-streak').textContent = streakText;
+
+  let livesHTML = '';
+  for (let i = 0; i < 3; i++) {
+    livesHTML += i < state.lives ? '\u26CF\uFE0F' : '\uD83D\uDC80';
+  }
+  document.getElementById('hud-lives').innerHTML = livesHTML;
+}
+
+function nextQuestion() {
+  if (state.correctCount >= 5) {
+    levelComplete();
+    return;
+  }
+
+  state.answering = false;
+  currentQuestion = generateReadingQuestion(state.currentLevel);
+
+  // Pick random mob and taunt
+  const mob = MOBS[Math.floor(Math.random() * MOBS.length)];
+  const taunt = MOB_TAUNTS[Math.floor(Math.random() * MOB_TAUNTS.length)];
+
+  // Set mob
+  const obstacleEl = document.getElementById('obstacle');
+  obstacleEl.className = 'obstacle-container entering';
+  document.getElementById('obstacle-emoji').textContent = mob.emoji;
+  document.getElementById('speech-bubble').textContent = taunt;
+
+  // Reset miner
+  const miner = document.getElementById('miner');
+  miner.className = 'miner-container';
+  void miner.offsetWidth;
+  miner.style.animation = '';
+
+  // Set question
+  document.getElementById('question-text').textContent = currentQuestion.text;
+
+  // Set answers
+  const grid = document.getElementById('answers-grid');
+  grid.innerHTML = '';
+  currentQuestion.choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = choice;
+    btn.onclick = () => checkAnswer(choice, btn);
+    grid.appendChild(btn);
+  });
+
+  setTimeout(() => { state.answering = true; }, 300);
+}
+
+function checkAnswer(choice, btn) {
+  if (!state.answering) return;
+  state.answering = false;
+  playSound('click');
+
+  const correct = choice === currentQuestion.answer;
+  const miner = document.getElementById('miner');
+  const obstacle = document.getElementById('obstacle');
+
+  // Highlight all buttons
+  document.querySelectorAll('.answer-btn').forEach(b => {
+    if (b.textContent === currentQuestion.answer) {
+      b.classList.add('correct');
+    } else if (b === btn && !correct) {
+      b.classList.add('wrong');
+    }
+    b.onclick = null;
+  });
+
+  if (correct) {
+    state.correctCount++;
+    state.streak++;
+    const levelMultiplier = state.currentLevel + 1;
+    const streakBonus = Math.min(state.streak, 5);
+    const points = 10 * levelMultiplier * streakBonus;
+    state.score += points;
+    state.totalScore += points;
+
+    miner.className = 'miner-container mining';
+    const soundType = state.selectedChar === 'lunchlady' ? 'foodthrow' : state.selectedChar === 'grandma' ? 'canewhack' : 'correct';
+    playSound(soundType);
+    setTimeout(() => {
+      showBlockBlast();
+      obstacle.className = 'obstacle-container dodged';
+    }, 250);
+
+    const msgs = state.selectedChar === 'lunchlady' ? LUNCHLADY_MESSAGES : state.selectedChar === 'grandma' ? GRANDMA_MESSAGES : CORRECT_MESSAGES;
+    showMineEffect(msgs[Math.floor(Math.random() * msgs.length)] + ` +${points}`);
+
+    updateHUD();
+    setTimeout(() => nextQuestion(), 1200);
+
+  } else {
+    state.streak = 0;
+    state.lives--;
+
+    miner.className = 'miner-container damaged';
+    obstacle.className = 'obstacle-container hit';
+    playSound('wrong');
+
+    const taunt = document.getElementById('speech-bubble').textContent;
+    showMobZoom(taunt);
+
+    updateHUD();
+
+    if (state.lives <= 0) {
+      setTimeout(() => gameOver(), 1800);
+    } else {
+      setTimeout(() => nextQuestion(), 1800);
+    }
+  }
+}
+
+function showMineEffect(text) {
+  const el = document.createElement('div');
+  el.className = 'mine-effect';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1100);
+}
+
+function showBlockBlast() {
+  const container = document.createElement('div');
+  container.className = 'particle-container';
+  document.body.appendChild(container);
+
+  const minerEl = document.getElementById('miner');
+  const rect = minerEl.getBoundingClientRect();
+  const originX = rect.right - 20;
+  const originY = rect.top + rect.height / 2;
+
+  const isLunchLady = state.selectedChar === 'lunchlady';
+  const isGrandma = state.selectedChar === 'grandma';
+
+  if (isGrandma) {
+    // Grandma: Cane whack + denture throw
+    const cane = document.createElement('div');
+    cane.style.cssText = `position:absolute; font-size:120px; left:${originX - 30}px; top:${originY - 70}px; z-index:10; pointer-events:none;`;
+    cane.textContent = '\uD83E\uDDAF';
+    container.appendChild(cane);
+
+    cane.animate([
+      { transform: 'rotate(-60deg) translateX(0px)', opacity: 1 },
+      { transform: 'rotate(40deg) translateX(200px)', opacity: 1, offset: 0.4 },
+      { transform: 'rotate(50deg) translateX(220px)', opacity: 1, offset: 0.5 },
+      { transform: 'rotate(30deg) translateX(180px)', opacity: 0 }
+    ], { duration: 600, easing: 'ease-in-out', fill: 'forwards' });
+
+    const dentureEmojis = ['\uD83E\uDDB7', '\uD83E\uDDB7', '\uD83E\uDDB7', '\uD83E\uDDB7', '\uD83E\uDDB7', '\uD83E\uDDB7'];
+    for (let i = 0; i < 6; i++) {
+      const denture = document.createElement('div');
+      denture.className = 'xp-orb';
+      denture.textContent = dentureEmojis[i];
+      denture.style.fontSize = (30 + Math.random() * 18) + 'px';
+      const angle = -30 + Math.random() * 60;
+      const distance = 180 + Math.random() * 300;
+      const dx = Math.cos(angle * Math.PI / 180) * distance;
+      const dy = Math.sin(angle * Math.PI / 180) * distance;
+      const duration = 0.5 + Math.random() * 0.3;
+      const startY = originY + (Math.random() - 0.5) * 50;
+
+      denture.style.left = originX + 'px';
+      denture.style.top = startY + 'px';
+
+      denture.animate([
+        { transform: 'scale(0.3) rotate(0deg)', opacity: 1, left: originX + 'px', top: startY + 'px' },
+        { transform: 'scale(1.6) rotate(' + (180 + Math.random() * 540) + 'deg)', opacity: 0, left: (originX + dx) + 'px', top: (startY + dy) + 'px' }
+      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards', delay: 100 + Math.random() * 150 });
+
+      container.appendChild(denture);
+    }
+
+    setTimeout(() => {
+      const impactX = originX + 200;
+      const impactY = originY;
+      const impacts = ['\uD83D\uDCA5', '\u2B50', '\uD83D\uDCAB', '\u2728', '\uD83D\uDCA2', '\uD83E\uDDB7', '\uD83D\uDCA5', '\uD83D\uDCAB'];
+      for (let i = 0; i < 8; i++) {
+        const star = document.createElement('div');
+        star.className = 'xp-orb';
+        star.textContent = impacts[i];
+        star.style.fontSize = (24 + Math.random() * 20) + 'px';
+        const angle = Math.random() * 360;
+        const distance = 60 + Math.random() * 150;
+        const dx = Math.cos(angle * Math.PI / 180) * distance;
+        const dy = Math.sin(angle * Math.PI / 180) * distance;
+
+        star.style.left = impactX + 'px';
+        star.style.top = impactY + 'px';
+
+        star.animate([
+          { transform: 'scale(0.3) rotate(0deg)', opacity: 1, left: impactX + 'px', top: impactY + 'px' },
+          { transform: 'scale(1.5) rotate(' + (Math.random() * 360) + 'deg)', opacity: 0, left: (impactX + dx) + 'px', top: (impactY + dy) + 'px' }
+        ], { duration: 500 + Math.random() * 300, easing: 'ease-out', fill: 'forwards' });
+
+        container.appendChild(star);
+      }
+    }, 250);
+
+  } else if (isLunchLady) {
+    // Hot Lunch Lady: throw food
+    for (let i = 0; i < 12; i++) {
+      const food = document.createElement('div');
+      food.className = 'xp-orb';
+      food.textContent = CAFETERIA_FOOD[Math.floor(Math.random() * CAFETERIA_FOOD.length)];
+      food.style.fontSize = (28 + Math.random() * 20) + 'px';
+      const angle = -35 + Math.random() * 70;
+      const distance = 180 + Math.random() * 380;
+      const dx = Math.cos(angle * Math.PI / 180) * distance;
+      const dy = Math.sin(angle * Math.PI / 180) * distance;
+      const duration = 0.5 + Math.random() * 0.4;
+      const startY = originY + (Math.random() - 0.5) * 50;
+
+      food.style.left = originX + 'px';
+      food.style.top = startY + 'px';
+
+      food.animate([
+        { transform: 'scale(0.3) rotate(0deg)', opacity: 1, left: originX + 'px', top: startY + 'px' },
+        { transform: 'scale(1.8) rotate(' + (180 + Math.random() * 360) + 'deg)', opacity: 0, left: (originX + dx) + 'px', top: (startY + dy) + 'px' }
+      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
+
+      container.appendChild(food);
+    }
+
+  } else {
+    // Normal: block break particles + XP orbs
+    const blockColors = ['#8b6914', '#7f7f7f', '#5a5a5a', '#6b4c12', '#5d8c3e', '#333'];
+    for (let i = 0; i < 16; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'block-particle';
+      const size = 8 + Math.random() * 14;
+      const angle = -40 + Math.random() * 80;
+      const distance = 150 + Math.random() * 350;
+      const dx = Math.cos(angle * Math.PI / 180) * distance;
+      const dy = Math.sin(angle * Math.PI / 180) * distance;
+      const duration = 0.4 + Math.random() * 0.4;
+      const color = blockColors[Math.floor(Math.random() * blockColors.length)];
+      const startY = originY + (Math.random() - 0.5) * 50;
+
+      particle.style.cssText = `left:${originX}px; top:${startY}px; width:${size}px; height:${size}px; background:${color}; border:2px solid rgba(0,0,0,0.3);`;
+
+      particle.animate([
+        { transform: 'scale(1) rotate(0deg)', opacity: 0.9, left: originX + 'px', top: startY + 'px' },
+        { transform: 'scale(0.3) rotate(180deg)', opacity: 0, left: (originX + dx) + 'px', top: (startY + dy) + 'px' }
+      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
+
+      container.appendChild(particle);
+    }
+
+    // XP orbs
+    const xpEmojis = ['\u2728', '\uD83D\uDFE2', '\u2B50', '\u2728', '\uD83D\uDFE2', '\u2B50'];
+    for (let i = 0; i < 6; i++) {
+      const orb = document.createElement('div');
+      orb.className = 'xp-orb';
+      orb.textContent = xpEmojis[i % xpEmojis.length];
+      const angle = -50 + Math.random() * 100;
+      const distance = 120 + Math.random() * 280;
+      const dx = Math.cos(angle * Math.PI / 180) * distance;
+      const dy = Math.sin(angle * Math.PI / 180) * distance;
+      const duration = 0.5 + Math.random() * 0.4;
+      const startY = originY + (Math.random() - 0.5) * 40;
+
+      orb.style.left = originX + 'px';
+      orb.style.top = startY + 'px';
+
+      orb.animate([
+        { transform: 'scale(0.5) rotate(0deg)', opacity: 1, left: originX + 'px', top: startY + 'px' },
+        { transform: 'scale(1.3) rotate(180deg)', opacity: 0, left: (originX + dx) + 'px', top: (startY + dy) + 'px' }
+      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
+
+      container.appendChild(orb);
+    }
+  }
+
+  setTimeout(() => container.remove(), 1200);
+}
+
+function showMobZoom(text) {
+  const el = document.createElement('div');
+  el.className = 'mob-zoom';
+  el.innerHTML = `<div class="mob-zoom-text">${text}</div>`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1600);
+}
+
+// ===== LEVEL COMPLETE =====
+function levelComplete() {
+  const levelId = LEVELS[state.currentLevel].id;
+  if (!state.completedLevels.includes(levelId)) {
+    state.completedLevels.push(levelId);
+  }
+
+  const newUnlock = CHARACTERS.find(c =>
+    c.unlockLevel === levelId && !state.unlockedChars.includes(c.id)
+  );
+  if (newUnlock) {
+    state.unlockedChars.push(newUnlock.id);
+  }
+
+  if (state.totalScore > state.highScore) {
+    state.highScore = state.totalScore;
+  }
+  saveState();
+
+  playSound('levelup');
+  showScreen('complete-screen');
+  document.getElementById('complete-title').textContent =
+    state.currentLevel === 7 ? '\uD83C\uDFC6 YOU CONQUERED THE NETHER! \uD83C\uDFC6' : '\u26CF\uFE0F Level Complete! \u26CF\uFE0F';
+  document.getElementById('complete-score').innerHTML =
+    `Score: \u2B50 ${state.score}<br>Total: \u2B50 ${state.totalScore}`;
+
+  const unlockSection = document.getElementById('unlock-section');
+  if (newUnlock) {
+    unlockSection.innerHTML = `
+      <div class="unlock-announcement">New Miner Unlocked!</div>
+      <div class="unlock-char">${newUnlock.emoji}</div>
+      <div class="unlock-announcement" style="font-size:clamp(10px,2vw,16px);">${newUnlock.name}</div>
+      <div style="color:rgba(255,255,255,0.7); font-style:italic;">"${newUnlock.quote}"</div>
+    `;
+  } else {
+    unlockSection.innerHTML = '';
+  }
+
+  const nextBtn = document.getElementById('btn-next-level');
+  nextBtn.style.display = state.currentLevel < LEVELS.length - 1 ? '' : 'none';
+
+  spawnConfetti();
+}
+
+function spawnConfetti() {
+  const container = document.getElementById('confetti-container');
+  container.innerHTML = '';
+  for (let i = 0; i < 40; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.textContent = CONFETTI_ITEMS[Math.floor(Math.random() * CONFETTI_ITEMS.length)];
+    el.style.left = Math.random() * 100 + '%';
+    el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    el.style.animationDelay = Math.random() * 1 + 's';
+    el.style.fontSize = (16 + Math.random() * 20) + 'px';
+    container.appendChild(el);
+  }
+}
+
+function nextLevel() {
+  if (state.currentLevel < LEVELS.length - 1) {
+    startLevel(state.currentLevel + 1);
+  }
+}
+
+function replayLevel() {
+  startLevel(state.currentLevel);
+}
+
+// ===== GAME OVER =====
+function gameOver() {
+  playSound('gameover');
+  showScreen('gameover-screen');
+  const phrases = [
+    "The mobs got you! \uD83D\uDE31",
+    "Too many hits! Try again! \uD83D\uDCAA",
+    "The Creeper won this time... \uD83D\uDCA5",
+    "Respawn and try again! \u26CF\uFE0F",
+    "Shake it off and mine again! \uD83D\uDC8E"
+  ];
+  document.getElementById('gameover-msg').textContent =
+    phrases[Math.floor(Math.random() * phrases.length)];
+  saveState();
+}
+
+// ===== INIT =====
+loadState();
+showTitle();
+</script>
+</body>
+</html>

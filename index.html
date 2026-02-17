@@ -5,2016 +5,269 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
-<title>Webb's Surf Math</title>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Press+Start+2P&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+<title>Webb's Games</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  :root {
-    --ocean-deep: #0a4c7a;
-    --ocean-mid: #1a7ab5;
-    --ocean-light: #3db8e8;
-    --sky-top: #87CEEB;
-    --sky-bottom: #e0f4ff;
-    --sand: #f5deb3;
-    --sunset-orange: #ff7043;
-    --sunset-pink: #ff80ab;
-    --sunset-yellow: #ffd54f;
-    --foam: #e8f5ff;
-    --correct-green: #4caf50;
-    --wrong-red: #f44336;
-  }
-
   body {
-    font-family: 'Nunito', 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-    overflow: hidden;
-    height: 100vh;
-    width: 100vw;
-    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 40%, var(--ocean-light) 50%, var(--ocean-mid) 70%, var(--ocean-deep) 100%);
-    user-select: none;
+    font-family: 'Nunito', Arial, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 30%, #0f3460 60%, #1a1a2e 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-x: hidden;
   }
 
-  /* ===== WAVE ANIMATIONS ===== */
-  .ocean-bg {
+  /* Stars background */
+  body::before {
+    content: '';
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
+    background-image:
+      radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+      radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+      radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+      radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+      radial-gradient(2px 2px at 160px 20px, #fff, transparent),
+      radial-gradient(1px 1px at 200px 60px, rgba(255,255,255,0.7), transparent),
+      radial-gradient(2px 2px at 250px 90px, #fff, transparent),
+      radial-gradient(1px 1px at 300px 30px, rgba(255,255,255,0.5), transparent),
+      radial-gradient(2px 2px at 350px 70px, #fff, transparent),
+      radial-gradient(1px 1px at 400px 50px, rgba(255,255,255,0.8), transparent);
+    background-size: 420px 100px;
+    animation: twinkle 4s ease-in-out infinite alternate;
     pointer-events: none;
     z-index: 0;
   }
 
-  .wave {
-    position: absolute;
-    width: 200%;
-    height: 80px;
-    background: repeating-linear-gradient(90deg,
-      transparent 0%, rgba(255,255,255,0.15) 25%, transparent 50%);
-    border-radius: 50% 50% 0 0;
-    animation: wave-move linear infinite;
+  @keyframes twinkle {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
   }
-  .wave1 { bottom: 35%; animation-duration: 7s; opacity: 0.5; }
-  .wave2 { bottom: 33%; animation-duration: 9s; animation-delay: -2s; opacity: 0.3; }
-  .wave3 { bottom: 30%; animation-duration: 11s; animation-delay: -4s; opacity: 0.2; }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  h1 {
+    font-family: 'Lilita One', 'Nunito', sans-serif;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    color: #fff;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 40px rgba(100,180,255,0.3);
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+
+  .subtitle {
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 50px;
+    font-weight: 700;
+  }
+
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    width: 100%;
+  }
+
+  .game-card {
+    position: relative;
+    border-radius: 24px;
+    padding: 40px 30px 35px;
+    text-decoration: none;
+    color: #fff;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 320px;
+  }
+
+  .game-card:hover {
+    transform: translateY(-8px) scale(1.02);
+  }
+
+  .game-card:active {
+    transform: translateY(-2px) scale(0.98);
+  }
+
+  /* Surf Math Card */
+  .card-surf {
+    background: linear-gradient(160deg, #87CEEB 0%, #1a7ab5 40%, #0a4c7a 100%);
+    box-shadow: 0 8px 32px rgba(10,76,122,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+
+  .card-surf:hover {
+    box-shadow: 0 16px 48px rgba(10,76,122,0.6), inset 0 1px 0 rgba(255,255,255,0.3), 0 0 30px rgba(61,184,232,0.3);
+  }
+
+  /* Wave decoration for surf card */
+  .card-surf::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: -10%;
+    width: 120%; height: 80px;
+    background: repeating-linear-gradient(90deg,
+      transparent 0px, transparent 30px,
+      rgba(255,255,255,0.08) 30px, rgba(255,255,255,0.08) 60px
+    );
+    border-radius: 50% 50% 0 0;
+    opacity: 0.5;
+    animation: wave-move 6s linear infinite;
+  }
 
   @keyframes wave-move {
     0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    100% { transform: translateX(-60px); }
   }
 
-  /* Sun */
-  .sun {
-    position: fixed;
-    top: 30px;
-    right: 60px;
-    width: 80px;
-    height: 80px;
-    background: radial-gradient(circle, #ffd54f 40%, #ffb300 70%, transparent 71%);
-    border-radius: 50%;
-    z-index: 0;
-    animation: sun-glow 3s ease-in-out infinite alternate;
-  }
-  @keyframes sun-glow {
-    0% { box-shadow: 0 0 30px rgba(255,213,79,0.5); }
-    100% { box-shadow: 0 0 60px rgba(255,213,79,0.8); }
+  /* Mine & Read Card */
+  .card-mine {
+    background: linear-gradient(160deg, #7ec850 0%, #5d8c3e 15%, #8b6914 35%, #6b4c12 55%, #5a5a5a 80%, #333 100%);
+    box-shadow: 0 8px 32px rgba(51,51,51,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+    image-rendering: pixelated;
   }
 
-  /* Clouds */
-  .cloud {
-    position: fixed;
-    font-size: 40px;
-    opacity: 0.7;
-    z-index: 0;
-    animation: cloud-drift linear infinite;
-  }
-  .cloud1 { top: 40px; left: -60px; animation-duration: 25s; font-size: 50px; }
-  .cloud2 { top: 80px; left: -60px; animation-duration: 35s; animation-delay: -10s; }
-  .cloud3 { top: 20px; left: -60px; animation-duration: 30s; animation-delay: -20s; font-size: 35px; }
-  @keyframes cloud-drift {
-    0% { transform: translateX(-60px); }
-    100% { transform: translateX(calc(100vw + 60px)); }
+  .card-mine:hover {
+    box-shadow: 0 16px 48px rgba(51,51,51,0.6), inset 0 1px 0 rgba(255,255,255,0.3), 0 0 30px rgba(78,228,252,0.3);
   }
 
-  /* ===== SCREENS ===== */
-  .screen {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    transition: opacity 0.4s, transform 0.4s;
-  }
-  .screen.hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.95);
-  }
-
-  /* ===== TITLE SCREEN ===== */
-  .title-text {
-    font-family: 'Lilita One', 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-    font-size: clamp(48px, 10vw, 90px);
-    color: white;
-    text-shadow:
-      4px 4px 0 var(--ocean-deep),
-      -2px -2px 0 var(--sunset-orange),
-      0 0 30px rgba(255,112,67,0.5);
-    text-align: center;
-    animation: title-bounce 2s ease-in-out infinite;
-    line-height: 1.1;
-  }
-  .title-text .subtitle {
-    font-size: clamp(24px, 5vw, 45px);
-    display: block;
-    color: var(--sunset-yellow);
-    text-shadow: 3px 3px 0 var(--ocean-deep);
-  }
-  @keyframes title-bounce {
-    0%, 100% { transform: translateY(0) rotate(-1deg); }
-    50% { transform: translateY(-10px) rotate(1deg); }
-  }
-
-  .title-surfer {
-    font-size: 80px;
-    animation: surfer-bob 1.5s ease-in-out infinite;
-    margin: 10px 0;
-  }
-  @keyframes surfer-bob {
-    0%, 100% { transform: translateY(0) rotate(-5deg); }
-    50% { transform: translateY(-15px) rotate(5deg); }
-  }
-
-  .menu-btn {
-    font-family: 'Nunito', 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-    font-size: clamp(18px, 3vw, 28px);
-    font-weight: 900;
-    padding: 15px 40px;
-    margin: 8px;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-  }
-  .menu-btn:hover {
-    transform: scale(1.08) translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-  }
-  .menu-btn:active {
-    transform: scale(0.95);
-  }
-  .btn-play {
-    background: linear-gradient(135deg, var(--sunset-orange), #ff5722);
-    color: white;
-    box-shadow: 0 4px 15px rgba(255,87,34,0.5);
-    font-size: clamp(22px, 4vw, 36px);
-  }
-  .btn-leaderboard {
-    background: linear-gradient(135deg, var(--sunset-yellow), #ffc107);
-    color: var(--ocean-deep);
-    box-shadow: 0 4px 15px rgba(255,193,7,0.5);
-  }
-  .btn-characters {
-    background: linear-gradient(135deg, var(--ocean-light), var(--ocean-mid));
-    color: white;
-    box-shadow: 0 4px 15px rgba(26,122,181,0.5);
-  }
-  .btn-back {
-    background: linear-gradient(135deg, #78909c, #546e7a);
-    color: white;
-    box-shadow: 0 4px 15px rgba(84,110,122,0.4);
-  }
-  .btn-next {
-    background: linear-gradient(135deg, var(--correct-green), #388e3c);
-    color: white;
-    box-shadow: 0 4px 15px rgba(76,175,80,0.5);
-  }
-
-  /* ===== CHARACTER SELECT ===== */
-  .char-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 15px;
-    max-width: 700px;
-    width: 90%;
-    margin: 20px 0;
-  }
-  .char-card {
-    background: rgba(255,255,255,0.2);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 15px 10px;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
-    border: 3px solid transparent;
-  }
-  .char-card:hover:not(.locked) {
-    transform: translateY(-5px);
-    background: rgba(255,255,255,0.35);
-  }
-  .char-card.selected {
-    border-color: var(--sunset-yellow);
-    background: rgba(255,213,79,0.3);
-    transform: scale(1.05);
-  }
-  .char-card.locked {
-    opacity: 0.4;
-    cursor: not-allowed;
-    filter: grayscale(0.7);
-  }
-  .char-emoji { font-size: 40px; line-height: 1.2; }
-  .char-name {
-    font-weight: 900;
-    color: white;
-    font-size: 14px;
-    margin-top: 5px;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-  }
-  .char-board {
-    font-size: 10px;
-    color: var(--sunset-yellow);
-    margin-top: 3px;
-  }
-  .lock-icon { font-size: 20px; margin-top: 5px; }
-
-  /* ===== LEVEL SELECT ===== */
-  .level-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    max-width: 750px;
-    width: 90%;
-    margin: 20px 0;
-  }
-  .level-card {
-    background: rgba(255,255,255,0.2);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 15px;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
-    border: 2px solid transparent;
-  }
-  .level-card:hover:not(.locked) {
-    transform: translateY(-4px);
-    background: rgba(255,255,255,0.35);
-  }
-  .level-card.locked {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-  .level-card.completed {
-    border-color: var(--correct-green);
-    background: rgba(76,175,80,0.2);
-  }
-  .level-num {
-    font-size: 28px;
-    font-weight: 900;
-    color: var(--sunset-yellow);
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
-  }
-  .level-name {
-    font-size: 13px;
-    color: white;
-    font-weight: 700;
-    margin-top: 4px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-  }
-  .level-desc {
-    font-size: 11px;
-    color: rgba(255,255,255,0.7);
-    margin-top: 3px;
-  }
-
-  /* ===== GAME SCREEN ===== */
-  .game-hud {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background: rgba(0,0,0,0.3);
-    backdrop-filter: blur(5px);
-    z-index: 20;
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-  .hud-level {
-    font-weight: 900;
-    color: var(--sunset-yellow);
-    font-size: clamp(14px, 2.5vw, 20px);
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-  }
-  .hud-score {
-    font-weight: 900;
-    color: white;
-    font-size: clamp(16px, 3vw, 24px);
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-  }
-  .hud-streak {
-    font-weight: 900;
-    color: var(--sunset-orange);
-    font-size: clamp(14px, 2.5vw, 20px);
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-  }
-  .hud-lives {
-    font-size: clamp(20px, 3vw, 30px);
-    display: flex;
-    gap: 3px;
-  }
-  .hud-progress {
-    font-weight: 700;
-    color: rgba(255,255,255,0.8);
-    font-size: clamp(12px, 2vw, 16px);
-  }
-
-  /* Game area */
-  .game-area {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Surfer scene */
-  .surf-scene {
-    position: relative;
-    width: 90%;
-    max-width: 750px;
-    height: 240px;
-    margin-top: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .surfer-container {
-    font-size: 90px;
-    position: relative;
-    z-index: 5;
-    transition: transform 0.3s;
-    animation: surfer-ride 1.5s ease-in-out infinite;
-  }
-  @keyframes surfer-ride {
-    0%, 100% { transform: translateY(0) rotate(-2deg); }
-    50% { transform: translateY(-8px) rotate(2deg); }
-  }
-  .surfer-container.dodge {
-    animation: surfer-carve 1s ease-out;
-  }
-  @keyframes surfer-carve {
-    0% { transform: translateY(0) scaleX(1) rotate(0); }
-    20% { transform: translateY(-10px) scaleX(1) rotate(-10deg); }
-    40% { transform: translateY(-5px) scaleX(-1) rotate(15deg) scale(1.15); }
-    60% { transform: translateY(5px) scaleX(-1) rotate(5deg) scale(1.2); }
-    80% { transform: translateY(-5px) scaleX(1) rotate(-5deg) scale(1.1); }
-    100% { transform: translateY(0) scaleX(1) rotate(0) scale(1); }
-  }
-  .surfer-container.wipeout {
-    animation: surfer-wipeout 1s ease-out;
-  }
-  @keyframes surfer-wipeout {
-    0% { transform: translateY(0) rotate(0); }
-    25% { transform: translateX(30px) rotate(45deg); }
-    50% { transform: translateY(20px) rotate(180deg) scale(0.8); }
-    75% { transform: translateY(30px) rotate(270deg) scale(0.6); opacity: 0.6; }
-    100% { transform: translateY(0) rotate(360deg) scale(1); opacity: 1; }
-  }
-
-  .surfer-board {
-    display: none;
-  }
-  .surfer-wave {
-    display: block;
-    position: relative;
-    margin-top: -25px;
-    text-align: center;
-    width: 140px;
-    height: 60px;
-  }
-  .surfer-wave-shape {
-    position: absolute;
-    width: 140px;
-    height: 55px;
-    background: linear-gradient(180deg, rgba(61,184,232,0.9) 0%, rgba(26,122,181,0.95) 40%, rgba(10,76,122,0.9) 100%);
-    border-radius: 60% 80% 40% 50% / 60% 50% 80% 40%;
-    box-shadow: 0 4px 15px rgba(10,76,122,0.4), inset 0 -5px 15px rgba(255,255,255,0.2);
-    overflow: hidden;
-  }
-  .surfer-wave-shape::before {
+  /* Pixel ore decoration for mine card */
+  .card-mine::after {
     content: '';
     position: absolute;
-    top: 5px;
-    left: 10%;
-    width: 80%;
-    height: 12px;
-    background: rgba(255,255,255,0.35);
-    border-radius: 50%;
-    filter: blur(3px);
-  }
-  .surfer-wave-shape::after {
-    content: '';
-    position: absolute;
-    top: 20px;
-    left: 20%;
-    width: 60%;
-    height: 8px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 50%;
-    filter: blur(2px);
-  }
-  .surfer-foam {
-    position: absolute;
-    bottom: -5px;
-    left: -10px;
-    right: -10px;
-    height: 18px;
-    background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 50%, transparent 70%),
-                radial-gradient(ellipse at 70% 50%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 50%, transparent 70%);
-    border-radius: 50%;
-    filter: blur(2px);
-    animation: foam-shimmer 1s ease-in-out infinite alternate;
-  }
-  @keyframes foam-shimmer {
-    0% { opacity: 0.7; transform: scaleX(0.95); }
-    100% { opacity: 1; transform: scaleX(1.05); }
+    bottom: 0; left: 0;
+    width: 100%; height: 60px;
+    background:
+      radial-gradient(3px 3px at 20% 40%, #ffd700, transparent),
+      radial-gradient(3px 3px at 50% 60%, #4ee4fc, transparent),
+      radial-gradient(3px 3px at 80% 30%, #c8c8c8, transparent),
+      radial-gradient(2px 2px at 35% 70%, #ffd700, transparent),
+      radial-gradient(2px 2px at 65% 50%, #4ee4fc, transparent),
+      radial-gradient(3px 3px at 10% 60%, #333, transparent),
+      radial-gradient(3px 3px at 90% 70%, #333, transparent);
+    opacity: 0.8;
   }
 
-  /* Obstacle */
-  .obstacle-container {
-    position: relative;
-    text-align: center;
-    transition: transform 0.5s, opacity 0.5s;
-  }
-  .obstacle-container.entering {
-    animation: obstacle-enter 0.6s ease-out forwards;
-  }
-  @keyframes obstacle-enter {
-    0% { transform: translateX(200px); opacity: 0; }
-    100% { transform: translateX(0); opacity: 1; }
-  }
-  .obstacle-container.dodged {
-    animation: obstacle-blasted 0.8s ease-out forwards;
-  }
-  @keyframes obstacle-blasted {
-    0% { transform: translateX(0) scale(1) rotate(0); opacity: 1; filter: blur(0); }
-    30% { transform: translateX(40px) scale(1.2) rotate(-10deg); opacity: 1; filter: blur(0); }
-    60% { transform: translateX(180px) translateY(-30px) scale(0.6) rotate(40deg); opacity: 0.6; filter: blur(2px); }
-    100% { transform: translateX(350px) translateY(80px) scale(0.1) rotate(90deg); opacity: 0; filter: blur(6px); }
-  }
-  .obstacle-container.hit {
-    animation: obstacle-hit 0.3s ease-out;
-  }
-  @keyframes obstacle-hit {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); }
+  .game-emoji {
+    font-size: clamp(3rem, 10vw, 5rem);
+    margin-bottom: 16px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    line-height: 1;
   }
 
-  .obstacle-emoji {
-    font-size: 95px;
-    display: block;
-  }
-  .speech-bubble {
-    position: relative;
-    background: white;
-    border-radius: 18px;
-    padding: 12px 18px;
-    font-size: clamp(16px, 3vw, 24px);
-    font-weight: 900;
-    color: #333;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
-    margin-bottom: 10px;
-    max-width: 260px;
-    animation: bubble-pop 0.4s ease-out;
-  }
-  .speech-bubble::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 10px solid transparent;
-    border-top-color: white;
-    border-bottom: 0;
-  }
-  @keyframes bubble-pop {
-    0% { transform: scale(0); opacity: 0; }
-    70% { transform: scale(1.1); }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
-  /* Grown-up zoom (wrong answer) */
-  .grownup-zoom {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    pointer-events: none;
-    animation: grownup-zoom-anim 1.5s ease-out forwards;
-  }
-  .grownup-zoom-text {
-    font-family: 'Lilita One', 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-    font-size: clamp(30px, 8vw, 70px);
-    color: var(--wrong-red);
-    text-shadow: 3px 3px 0 #b71c1c;
-    text-align: center;
-    padding: 20px;
-  }
-  @keyframes grownup-zoom-anim {
-    0% { opacity: 0; transform: scale(0.3); }
-    30% { opacity: 1; transform: scale(1.2); }
-    60% { transform: scale(1); }
-    100% { opacity: 0; transform: scale(1.5); }
-  }
-
-  /* Splash effect (correct answer) */
-  .splash-effect {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'Lilita One', 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-    font-size: clamp(36px, 8vw, 72px);
-    color: var(--sunset-yellow);
-    text-shadow: 3px 3px 0 var(--sunset-orange);
-    z-index: 100;
-    pointer-events: none;
-    animation: splash-anim 1s ease-out forwards;
-    text-align: center;
-  }
-  @keyframes splash-anim {
-    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(-10deg); }
-    40% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(5deg); }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5) translateY(-40px); }
-  }
-
-  /* Spray particles (correct answer) */
-  .spray-container {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 90;
-    overflow: hidden;
-  }
-  .spray-particle {
-    position: absolute;
-    border-radius: 50%;
-    animation: spray-fly linear forwards;
-  }
-  @keyframes spray-fly {
-    0% { transform: scale(1); opacity: 0.9; }
-    50% { opacity: 0.7; }
-    100% { transform: scale(0.2); opacity: 0; }
-  }
-  .spray-droplet {
-    position: absolute;
-    font-size: 28px;
-    animation: spray-droplet-fly linear forwards;
-    pointer-events: none;
-  }
-  @keyframes spray-droplet-fly {
-    0% { transform: scale(0.5) rotate(0); opacity: 1; }
-    40% { opacity: 0.9; }
-    100% { transform: scale(1.2) rotate(180deg); opacity: 0; }
-  }
-
-  /* Question area */
-  .question-area {
-    width: 90%;
-    max-width: 600px;
-    text-align: center;
-    margin-top: 10px;
-  }
-  .question-text {
-    font-family: 'Lilita One', 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-    font-size: clamp(32px, 7vw, 56px);
-    color: white;
-    text-shadow: 3px 3px 0 var(--ocean-deep);
-    margin-bottom: 15px;
-    background: rgba(0,0,0,0.2);
-    border-radius: 20px;
-    padding: 15px 25px;
-    backdrop-filter: blur(5px);
-  }
-  .answers-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    max-width: 450px;
-    margin: 0 auto;
-  }
-  .answer-btn {
-    font-family: 'Nunito', 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-    font-size: clamp(20px, 4vw, 32px);
-    font-weight: 900;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
-    color: var(--ocean-deep);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    transition: transform 0.1s, box-shadow 0.1s;
-  }
-  .answer-btn:hover {
-    transform: scale(1.06) translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
-  }
-  .answer-btn:active {
-    transform: scale(0.95);
-  }
-  .answer-btn.correct {
-    background: linear-gradient(135deg, var(--correct-green), #2e7d32) !important;
-    color: white !important;
-    transform: scale(1.1);
-  }
-  .answer-btn.wrong {
-    background: linear-gradient(135deg, var(--wrong-red), #c62828) !important;
-    color: white !important;
-    animation: shake 0.4s;
-  }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-8px); }
-    40% { transform: translateX(8px); }
-    60% { transform: translateX(-5px); }
-    80% { transform: translateX(5px); }
-  }
-
-  /* ===== LEADERBOARD ===== */
-  .leaderboard-panel {
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 20px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 60vh;
-    overflow-y: auto;
-  }
-  .leaderboard-title {
-    font-family: 'Lilita One', 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-    font-size: clamp(24px, 5vw, 36px);
-    color: var(--sunset-yellow);
-    text-align: center;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
-    margin-bottom: 15px;
-  }
-  .lb-row {
-    display: flex;
-    align-items: center;
-    padding: 10px 12px;
-    border-radius: 12px;
+  .game-title {
+    font-family: 'Lilita One', 'Nunito', sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2rem);
     margin-bottom: 6px;
-    background: rgba(255,255,255,0.1);
-    transition: background 0.2s;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    letter-spacing: 1px;
   }
-  .lb-row.player-row {
-    background: rgba(255,213,79,0.25);
-    border: 2px solid var(--sunset-yellow);
+
+  .card-mine .game-title {
+    font-family: 'Press Start 2P', 'Lilita One', monospace;
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    line-height: 1.4;
   }
-  .lb-rank {
+
+  .game-desc {
+    font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+    opacity: 0.9;
+    line-height: 1.5;
+    max-width: 280px;
+    margin-bottom: 20px;
+  }
+
+  .game-badge {
+    display: inline-block;
+    padding: 6px 18px;
+    border-radius: 30px;
+    font-size: 0.8rem;
     font-weight: 900;
-    font-size: 18px;
-    color: var(--sunset-yellow);
-    width: 30px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-  }
-  .lb-avatar { font-size: 28px; margin-right: 10px; }
-  .lb-info { flex: 1; }
-  .lb-name {
-    font-weight: 900;
-    color: white;
-    font-size: 16px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-  }
-  .lb-quote {
-    font-size: 12px;
-    color: rgba(255,255,255,0.6);
-    font-style: italic;
-  }
-  .lb-score {
-    font-weight: 900;
-    color: var(--sunset-orange);
-    font-size: 20px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: auto;
   }
 
-  /* ===== LEVEL COMPLETE ===== */
-  .level-complete-panel {
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(15px);
-    border-radius: 25px;
-    padding: 30px 40px;
-    text-align: center;
-    max-width: 500px;
-    width: 90%;
-  }
-  .complete-title {
-    font-family: 'Lilita One', 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-    font-size: clamp(28px, 6vw, 48px);
-    color: var(--sunset-yellow);
-    text-shadow: 3px 3px 0 var(--sunset-orange);
-    animation: title-bounce 1.5s ease-in-out infinite;
-  }
-  .complete-score {
-    font-size: clamp(18px, 3vw, 28px);
-    color: white;
-    margin: 15px 0;
-    font-weight: 900;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-  }
-  .unlock-announcement {
-    font-family: 'Lilita One', 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-    font-size: clamp(20px, 4vw, 32px);
-    color: var(--ocean-light);
-    text-shadow: 2px 2px 0 var(--ocean-deep);
-    margin: 15px 0;
-    animation: unlock-pulse 0.8s ease-in-out infinite alternate;
-  }
-  .unlock-char {
-    font-size: 60px;
-    animation: unlock-spin 1s ease-out;
-  }
-  @keyframes unlock-pulse {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.05); }
-  }
-  @keyframes unlock-spin {
-    0% { transform: rotate(0) scale(0); opacity: 0; }
-    50% { transform: rotate(360deg) scale(1.3); opacity: 1; }
-    100% { transform: rotate(720deg) scale(1); }
+  .badge-math {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.4);
   }
 
-  /* Confetti */
-  .confetti-container {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 50;
-    overflow: hidden;
-  }
-  .confetti {
-    position: absolute;
-    top: -20px;
-    font-size: 24px;
-    animation: confetti-fall linear forwards;
-  }
-  @keyframes confetti-fall {
-    0% { transform: translateY(-20px) rotate(0); opacity: 1; }
-    100% { transform: translateY(110vh) rotate(720deg); opacity: 0.3; }
+  .badge-reading {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.4);
   }
 
-  /* ===== GAME OVER ===== */
-  .gameover-panel {
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(15px);
-    border-radius: 25px;
-    padding: 30px 40px;
-    text-align: center;
-    max-width: 450px;
-    width: 90%;
-  }
-  .gameover-title {
-    font-family: 'Lilita One', 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-    font-size: clamp(28px, 6vw, 44px);
-    color: var(--wrong-red);
-    text-shadow: 3px 3px 0 #b71c1c;
-  }
-  .gameover-msg {
-    font-size: clamp(16px, 3vw, 22px);
-    color: white;
-    margin: 15px 0;
-    font-weight: 700;
+  .play-arrow {
+    display: inline-block;
+    margin-left: 6px;
+    transition: transform 0.3s ease;
   }
 
-  /* Section headers */
-  .screen-title {
-    font-family: 'Lilita One', 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
-    font-size: clamp(28px, 5vw, 44px);
-    color: white;
-    text-shadow: 3px 3px 0 var(--ocean-deep);
-    margin-bottom: 10px;
-    text-align: center;
+  .game-card:hover .play-arrow {
+    transform: translateX(4px);
   }
 
-  /* scrollbar */
-  ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
-
-  /* ===== MOBILE RESPONSIVE ===== */
-  @media (max-width: 600px) {
-    .title-text {
-      font-size: clamp(36px, 12vw, 60px);
-    }
-    .title-text .subtitle {
-      font-size: clamp(16px, 5vw, 28px);
-    }
-    .title-surfer { font-size: 60px; }
-    .menu-btn {
-      font-size: clamp(14px, 4vw, 22px);
-      padding: 12px 28px;
-      margin: 5px;
-    }
-    .btn-play {
-      font-size: clamp(18px, 5vw, 28px);
-    }
-    .screen-title {
-      font-size: clamp(22px, 7vw, 36px);
-    }
-
-    /* Game HUD */
-    .game-hud {
-      padding: 6px 10px;
-      gap: 3px;
-    }
-    .hud-level { font-size: clamp(11px, 3vw, 16px); }
-    .hud-score { font-size: clamp(13px, 3.5vw, 20px); }
-    .hud-streak { font-size: clamp(11px, 3vw, 16px); }
-    .hud-lives { font-size: clamp(16px, 4vw, 24px); }
-    .hud-progress { font-size: clamp(10px, 2.5vw, 14px); }
-
-    /* Surf scene */
-    .surf-scene {
-      height: 160px;
-      margin-top: 20px;
-    }
-    .surfer-container {
-      font-size: 55px;
-    }
-    .surfer-wave {
-      width: 90px;
-      height: 40px;
-      margin-top: -18px;
-    }
-    .surfer-wave-shape {
-      width: 90px;
-      height: 36px;
-    }
-    .obstacle-emoji {
-      font-size: 60px;
-    }
-    .speech-bubble {
-      font-size: clamp(12px, 3.5vw, 18px);
-      padding: 8px 12px;
-      max-width: 160px;
-    }
-
-    /* Question */
-    .question-area { margin-top: 5px; }
-    .question-text {
-      font-size: clamp(24px, 8vw, 40px);
-      padding: 10px 18px;
-      margin-bottom: 10px;
-    }
-    .answers-grid {
-      gap: 8px;
-      max-width: 320px;
-    }
-    .answer-btn {
-      font-size: clamp(18px, 5vw, 26px);
-      padding: 10px 15px;
-      border-radius: 12px;
-    }
-
-    /* Level/Char grids */
-    .char-grid {
-      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-      gap: 8px;
-    }
-    .char-emoji { font-size: 32px; }
-    .char-name { font-size: 11px; }
-    .level-grid {
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 8px;
-    }
-    .level-num { font-size: 22px; }
-    .level-name { font-size: 11px; }
-
-    /* Complete / Game Over panels */
-    .level-complete-panel, .gameover-panel {
-      padding: 20px 20px;
-    }
-    .complete-title, .gameover-title {
-      font-size: clamp(22px, 7vw, 36px);
-    }
-    .unlock-char { font-size: 45px; }
-
-    /* Sun smaller on mobile */
-    .sun { width: 50px; height: 50px; top: 15px; right: 20px; }
+  footer {
+    position: relative;
+    z-index: 1;
+    margin-top: 50px;
+    color: rgba(255,255,255,0.35);
+    font-size: 0.85rem;
   }
 
-  /* Extra small screens (iPhone SE etc) */
-  @media (max-width: 380px) {
-    .surf-scene { height: 130px; margin-top: 15px; }
-    .surfer-container { font-size: 42px; }
-    .surfer-wave { width: 70px; height: 32px; margin-top: -14px; }
-    .surfer-wave-shape { width: 70px; height: 28px; }
-    .obstacle-emoji { font-size: 45px; }
-    .speech-bubble { font-size: 11px; max-width: 130px; padding: 6px 8px; }
-    .question-text { font-size: clamp(20px, 8vw, 32px); padding: 8px 14px; }
-    .answer-btn { font-size: clamp(16px, 5vw, 22px); padding: 8px 12px; }
+  /* Mobile adjustments */
+  @media (max-width: 680px) {
+    .games-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .game-card {
+      min-height: 260px;
+      padding: 30px 24px 28px;
+    }
+    h1 { margin-bottom: 4px; }
+    .subtitle { margin-bottom: 30px; }
+    footer { margin-top: 30px; }
   }
 </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Webb's Games</h1>
+    <p class="subtitle">Pick a game and start learning!</p>
 
-<!-- Background elements -->
-<div class="ocean-bg">
-  <div class="wave wave1"></div>
-  <div class="wave wave2"></div>
-  <div class="wave wave3"></div>
-</div>
-<div class="sun"></div>
-<div class="cloud cloud1">&#9925;</div>
-<div class="cloud cloud2">&#9925;</div>
-<div class="cloud cloud3">&#9925;</div>
+    <div class="games-grid">
+      <a href="surf-math.html" class="game-card card-surf">
+        <div class="game-emoji">🏄‍♂️</div>
+        <div class="game-title">Surf Math</div>
+        <p class="game-desc">Ride the waves and solve math problems! Addition, subtraction, multiplication & more.</p>
+        <span class="game-badge badge-math">Math <span class="play-arrow">&#9654;</span></span>
+      </a>
 
-<!-- ===== TITLE SCREEN ===== -->
-<div id="title-screen" class="screen">
-  <div class="title-text">
-    Webb's Surf Math
-    <span class="subtitle">Dodge the Grown-Up Talk!</span>
-  </div>
-  <div class="title-surfer">&#x1F3C4;</div>
-  <button class="menu-btn btn-play" onclick="showLevelSelect()">&#x1F30A; Play!</button>
-  <button class="menu-btn btn-characters" onclick="showCharacterSelect()">&#x1F3C4; Pick Your Surfer</button>
-  <button class="menu-btn btn-leaderboard" onclick="showLeaderboard()">&#x1F3C6; Beach Scoreboard</button>
-</div>
-
-<!-- ===== CHARACTER SELECT ===== -->
-<div id="char-screen" class="screen hidden">
-  <div class="screen-title">Pick Your Surfer!</div>
-  <div id="char-grid" class="char-grid"></div>
-  <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
-    <button class="menu-btn btn-play" onclick="confirmCharacter()">&#x1F44D; Let's Go!</button>
-    <button class="menu-btn btn-back" onclick="showTitle()">&#x2B05; Back</button>
-  </div>
-</div>
-
-<!-- ===== LEVEL SELECT ===== -->
-<div id="level-screen" class="screen hidden">
-  <div class="screen-title">Choose Your Wave!</div>
-  <div id="level-grid" class="level-grid"></div>
-  <button class="menu-btn btn-back" onclick="showTitle()" style="margin-top:15px;">&#x2B05; Back</button>
-</div>
-
-<!-- ===== LEADERBOARD ===== -->
-<div id="leaderboard-screen" class="screen hidden">
-  <div class="screen-title">&#x1F3C6; Beach Scoreboard</div>
-  <div id="leaderboard-panel" class="leaderboard-panel"></div>
-  <button class="menu-btn btn-back" onclick="showTitle()" style="margin-top:15px;">&#x2B05; Back</button>
-</div>
-
-<!-- ===== GAME SCREEN ===== -->
-<div id="game-screen" class="screen hidden">
-  <div class="game-hud">
-    <div class="hud-level" id="hud-level"></div>
-    <div class="hud-progress" id="hud-progress"></div>
-    <div class="hud-score" id="hud-score">0</div>
-    <div class="hud-streak" id="hud-streak"></div>
-    <div class="hud-lives" id="hud-lives"></div>
-  </div>
-  <div class="game-area">
-    <div class="surf-scene">
-      <div class="surfer-container" id="surfer">
-        <span id="surfer-emoji">&#x1F3C4;</span>
-        <span class="surfer-board" id="surfer-board"></span>
-        <div class="surfer-wave">
-          <div class="surfer-wave-shape"></div>
-          <div class="surfer-foam"></div>
-        </div>
-      </div>
-      <div class="obstacle-container" id="obstacle">
-        <div class="speech-bubble" id="speech-bubble"></div>
-        <span class="obstacle-emoji" id="obstacle-emoji"></span>
-      </div>
-    </div>
-    <div class="question-area">
-      <div class="question-text" id="question-text"></div>
-      <div class="answers-grid" id="answers-grid"></div>
+      <a href="mine-and-read.html" class="game-card card-mine">
+        <div class="game-emoji">⛏️</div>
+        <div class="game-title">Mine & Read</div>
+        <p class="game-desc">Dig deep and master reading! Vocabulary, comprehension, context clues & more.</p>
+        <span class="game-badge badge-reading">Reading <span class="play-arrow">&#9654;</span></span>
+      </a>
     </div>
   </div>
-</div>
 
-<!-- ===== LEVEL COMPLETE ===== -->
-<div id="complete-screen" class="screen hidden">
-  <div class="level-complete-panel">
-    <div class="complete-title" id="complete-title">Level Complete!</div>
-    <div class="complete-score" id="complete-score"></div>
-    <div id="unlock-section"></div>
-    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
-      <button class="menu-btn btn-next" id="btn-next-level" onclick="nextLevel()">Next Wave &#x1F30A;</button>
-      <button class="menu-btn btn-play" onclick="replayLevel()">Replay &#x1F504;</button>
-      <button class="menu-btn btn-back" onclick="showTitle()">Menu &#x1F3E0;</button>
-    </div>
-  </div>
-  <div class="confetti-container" id="confetti-container"></div>
-</div>
-
-<!-- ===== GAME OVER ===== -->
-<div id="gameover-screen" class="screen hidden">
-  <div class="gameover-panel">
-    <div class="gameover-title">Wipeout! &#x1F4A6;</div>
-    <div class="gameover-msg" id="gameover-msg"></div>
-    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
-      <button class="menu-btn btn-play" onclick="replayLevel()">Try Again &#x1F504;</button>
-      <button class="menu-btn btn-back" onclick="showTitle()">Menu &#x1F3E0;</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ===== SOUND EFFECTS (Web Audio API) =====
-let audioCtx = null;
-let audioUnlocked = false;
-
-function getAudioCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return audioCtx;
-}
-
-// Mobile Safari requires audio to be unlocked on a user gesture (tap)
-function unlockAudio() {
-  if (audioUnlocked) return;
-  const ctx = getAudioCtx();
-  if (ctx.state === 'suspended') {
-    ctx.resume().then(() => { audioUnlocked = true; });
-  } else {
-    audioUnlocked = true;
-  }
-  // Play a silent buffer to fully unlock on iOS
-  const buf = ctx.createBuffer(1, 1, 22050);
-  const src = ctx.createBufferSource();
-  src.buffer = buf;
-  src.connect(ctx.destination);
-  src.start(0);
-}
-
-// Listen for first user interaction to unlock audio
-document.addEventListener('touchstart', unlockAudio, { once: false });
-document.addEventListener('touchend', unlockAudio, { once: false });
-document.addEventListener('click', unlockAudio, { once: false });
-
-function playSound(type) {
-  try {
-    const ctx = getAudioCtx();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    switch(type) {
-      case 'correct': {
-        // Bright rising "ding-ding!" + splash whoosh
-        const osc1 = ctx.createOscillator();
-        const gain1 = ctx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(600, ctx.currentTime);
-        osc1.frequency.linearRampToValueAtTime(1200, ctx.currentTime + 0.15);
-        gain1.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-        osc1.connect(gain1).connect(ctx.destination);
-        osc1.start(ctx.currentTime);
-        osc1.stop(ctx.currentTime + 0.4);
-
-        // Second "ding" higher
-        const osc2 = ctx.createOscillator();
-        const gain2 = ctx.createGain();
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(900, ctx.currentTime + 0.1);
-        osc2.frequency.linearRampToValueAtTime(1400, ctx.currentTime + 0.25);
-        gain2.gain.setValueAtTime(0, ctx.currentTime);
-        gain2.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.1);
-        gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-        osc2.connect(gain2).connect(ctx.destination);
-        osc2.start(ctx.currentTime + 0.1);
-        osc2.stop(ctx.currentTime + 0.5);
-
-        // Splash noise
-        const bufferSize = ctx.sampleRate * 0.3;
-        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const data = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
-        const noise = ctx.createBufferSource();
-        noise.buffer = noiseBuffer;
-        const noiseGain = ctx.createGain();
-        const noiseFilter = ctx.createBiquadFilter();
-        noiseFilter.type = 'bandpass';
-        noiseFilter.frequency.value = 2000;
-        noiseFilter.Q.value = 0.5;
-        noiseGain.gain.setValueAtTime(0, ctx.currentTime + 0.2);
-        noiseGain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.25);
-        noiseGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
-        noise.connect(noiseFilter).connect(noiseGain).connect(ctx.destination);
-        noise.start(ctx.currentTime + 0.2);
-        noise.stop(ctx.currentTime + 0.6);
-        break;
-      }
-      case 'wrong': {
-        // Descending buzzy "bwomp"
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(300, ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.4);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-        osc.connect(gain).connect(ctx.destination);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.5);
-
-        // Splash/crash noise
-        const bufferSize = ctx.sampleRate * 0.4;
-        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const data = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1);
-        const noise = ctx.createBufferSource();
-        noise.buffer = noiseBuffer;
-        const noiseGain = ctx.createGain();
-        const noiseFilter = ctx.createBiquadFilter();
-        noiseFilter.type = 'lowpass';
-        noiseFilter.frequency.value = 800;
-        noiseGain.gain.setValueAtTime(0.15, ctx.currentTime);
-        noiseGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-        noise.connect(noiseFilter).connect(noiseGain).connect(ctx.destination);
-        noise.start(ctx.currentTime);
-        noise.stop(ctx.currentTime + 0.4);
-        break;
-      }
-      case 'levelup': {
-        // Triumphant ascending arpeggio
-        const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
-        notes.forEach((freq, i) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.value = freq;
-          gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
-          gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + i * 0.12 + 0.05);
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.12 + 0.5);
-          osc.connect(gain).connect(ctx.destination);
-          osc.start(ctx.currentTime + i * 0.12);
-          osc.stop(ctx.currentTime + i * 0.12 + 0.5);
-        });
-        break;
-      }
-      case 'gameover': {
-        // Sad descending trombone "wah wah wah wahhh"
-        const notes = [400, 380, 360, 200];
-        const durations = [0.25, 0.25, 0.25, 0.6];
-        let t = ctx.currentTime;
-        notes.forEach((freq, i) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, t);
-          if (i === 3) osc.frequency.linearRampToValueAtTime(150, t + durations[i]);
-          gain.gain.setValueAtTime(0.2, t);
-          gain.gain.exponentialRampToValueAtTime(0.01, t + durations[i]);
-          osc.connect(gain).connect(ctx.destination);
-          osc.start(t);
-          osc.stop(t + durations[i]);
-          t += durations[i];
-        });
-        break;
-      }
-      case 'canewhack': {
-        // Grandma's cane: sharp wooden THWACK + comedic bonk
-        // Thwack
-        const thwack = ctx.createOscillator();
-        const thwackGain = ctx.createGain();
-        thwack.type = 'square';
-        thwack.frequency.setValueAtTime(1200, ctx.currentTime);
-        thwack.frequency.linearRampToValueAtTime(80, ctx.currentTime + 0.08);
-        thwackGain.gain.setValueAtTime(0.25, ctx.currentTime);
-        thwackGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
-        thwack.connect(thwackGain).connect(ctx.destination);
-        thwack.start(ctx.currentTime);
-        thwack.stop(ctx.currentTime + 0.12);
-
-        // Impact crack noise
-        const crackSize = ctx.sampleRate * 0.1;
-        const crackBuf = ctx.createBuffer(1, crackSize, ctx.sampleRate);
-        const crackData = crackBuf.getChannelData(0);
-        for (let i = 0; i < crackSize; i++) crackData[i] = (Math.random() * 2 - 1);
-        const crack = ctx.createBufferSource();
-        crack.buffer = crackBuf;
-        const crackGain = ctx.createGain();
-        const crackFilter = ctx.createBiquadFilter();
-        crackFilter.type = 'highpass';
-        crackFilter.frequency.value = 2000;
-        crackGain.gain.setValueAtTime(0.2, ctx.currentTime);
-        crackGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-        crack.connect(crackFilter).connect(crackGain).connect(ctx.destination);
-        crack.start(ctx.currentTime);
-        crack.stop(ctx.currentTime + 0.15);
-
-        // Comedic "bonk" after the hit
-        const bonk = ctx.createOscillator();
-        const bonkGain = ctx.createGain();
-        bonk.type = 'sine';
-        bonk.frequency.setValueAtTime(600, ctx.currentTime + 0.1);
-        bonk.frequency.linearRampToValueAtTime(200, ctx.currentTime + 0.3);
-        bonkGain.gain.setValueAtTime(0.15, ctx.currentTime + 0.1);
-        bonkGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
-        bonk.connect(bonkGain).connect(ctx.destination);
-        bonk.start(ctx.currentTime + 0.1);
-        bonk.stop(ctx.currentTime + 0.35);
-        break;
-      }
-      case 'foodthrow': {
-        // Cafeteria food throw: metal tray clang + splatty impact
-        // Tray clang
-        const tray = ctx.createOscillator();
-        const trayGain = ctx.createGain();
-        tray.type = 'square';
-        tray.frequency.setValueAtTime(800, ctx.currentTime);
-        tray.frequency.linearRampToValueAtTime(200, ctx.currentTime + 0.15);
-        trayGain.gain.setValueAtTime(0.15, ctx.currentTime);
-        trayGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-        tray.connect(trayGain).connect(ctx.destination);
-        tray.start(ctx.currentTime);
-        tray.stop(ctx.currentTime + 0.2);
-
-        // Splat noise
-        const splatSize = ctx.sampleRate * 0.35;
-        const splatBuf = ctx.createBuffer(1, splatSize, ctx.sampleRate);
-        const splatData = splatBuf.getChannelData(0);
-        for (let i = 0; i < splatSize; i++) splatData[i] = (Math.random() * 2 - 1) * 0.6;
-        const splat = ctx.createBufferSource();
-        splat.buffer = splatBuf;
-        const splatGain = ctx.createGain();
-        const splatFilter = ctx.createBiquadFilter();
-        splatFilter.type = 'lowpass';
-        splatFilter.frequency.value = 1200;
-        splatGain.gain.setValueAtTime(0, ctx.currentTime + 0.1);
-        splatGain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.15);
-        splatGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-        splat.connect(splatFilter).connect(splatGain).connect(ctx.destination);
-        splat.start(ctx.currentTime + 0.1);
-        splat.stop(ctx.currentTime + 0.5);
-
-        // Funny rising "boing" after splat
-        const boing = ctx.createOscillator();
-        const boingGain = ctx.createGain();
-        boing.type = 'sine';
-        boing.frequency.setValueAtTime(300, ctx.currentTime + 0.2);
-        boing.frequency.linearRampToValueAtTime(900, ctx.currentTime + 0.35);
-        boingGain.gain.setValueAtTime(0.12, ctx.currentTime + 0.2);
-        boingGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.45);
-        boing.connect(boingGain).connect(ctx.destination);
-        boing.start(ctx.currentTime + 0.2);
-        boing.stop(ctx.currentTime + 0.45);
-        break;
-      }
-      case 'click': {
-        // Quick pop/click
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = 800;
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
-        osc.connect(gain).connect(ctx.destination);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.08);
-        break;
-      }
-    }
-  } catch(e) {}
-}
-
-// ===== GAME DATA =====
-const CHARACTERS = [
-  { id: 'webb', name: 'Webb', emoji: '😎⛓️🏄', board: '🟦', unlockLevel: 0, quote: "Too cool for school! 😎", style: 'cool' },
-  { id: 'wilem', name: 'Wilem', emoji: '⚾🏄‍♂️', board: '🟥', unlockLevel: 0, quote: "Catch me if you can! ⚾", style: 'baseball' },
-  { id: 'quinn', name: 'Quinn', emoji: '🏄‍♀️', board: '🟪', unlockLevel: 0, quote: "Wave queen! 👑" },
-  { id: 'jackie', name: 'Jackie', emoji: '🐉🏄', board: '🟩', unlockLevel: 0, quote: "Dragon surfer, RAWR! 🔥", style: 'dragon' },
-  { id: 'shai', name: 'Shai', emoji: '🏄‍♂️', board: '🟧', unlockLevel: 0, quote: "Shai the wave rider!" },
-  { id: 'twins', name: 'Benj & Sam', emoji: '🏄‍♂️🏄', board: '🟨', unlockLevel: 0, quote: "Twin power!" },
-  { id: 'grandma', name: 'Grandma', emoji: '👵🏄', board: '🩷', unlockLevel: 0, quote: "Back in MY day...! 🦯", style: 'grandma' },
-  { id: 'lunchlady', name: 'The Hot Lunch Lady', emoji: '🦸‍♀️', board: '⭐', unlockLevel: 7, quote: "EAT YOUR LUNCH! 🍝", style: 'lunchlady' }
-];
-
-const CAFETERIA_FOOD = ['🍝', '🍕', '🌮', '🍔', '🥪', '🍟', '🧁', '🥧', '🍖', '🫘', '🥩', '🍗', '🥔', '🧀', '🥛'];
-
-const LEVELS = [
-  { id: 1, name: 'Beginner Beach', ops: ['+'], min: 1, max: 10, desc: 'Addition 1-10', emoji: '🏖️' },
-  { id: 2, name: 'Paddle Out', ops: ['-'], min: 1, max: 10, desc: 'Subtraction 1-10', emoji: '🚣' },
-  { id: 3, name: 'Small Waves', ops: ['+', '-'], min: 1, max: 20, desc: 'Add & Sub 1-20', emoji: '🌊' },
-  { id: 4, name: 'Big Waves', ops: ['×'], min: 1, max: 10, desc: 'Multiply 1-10', emoji: '🌊🌊' },
-  { id: 5, name: 'Barrel Roll', ops: ['÷'], min: 1, max: 10, desc: 'Divide 1-10', emoji: '🔄' },
-  { id: 6, name: 'Pipeline', ops: ['+', '-', '×', '÷'], min: 1, max: 20, desc: 'Mixed 1-20', emoji: '🌀' },
-  { id: 7, name: 'Tsunami', ops: ['+', '-', '×', '÷'], min: 1, max: 50, desc: 'Mixed 1-50', emoji: '🌊🌊🌊' }
-];
-
-const OBSTACLES = [
-  { emoji: '🦈', name: 'Shark' },
-  { emoji: '🪨', name: 'Rock' },
-  { emoji: '🐢', name: 'Turtle' },
-  { emoji: '🪸', name: 'Jellyfish' },
-  { emoji: '🦀', name: 'Crab' },
-  { emoji: '🐙', name: 'Octopus' },
-  { emoji: '🦑', name: 'Squid' },
-  { emoji: '🐡', name: 'Pufferfish' }
-];
-
-const GROWNUP_PHRASES = [
-  "Clean your room!", "Eat your vegetables!", "Time for bed!",
-  "No more screen time!", "Do your homework!", "Brush your teeth!",
-  "Stop picking your nose!", "Put on sunscreen!", "Share with your sister!",
-  "Turn off the TV!", "Sit still!", "Use your inside voice!",
-  "Because I said so!", "Stop making that noise!", "Wash your hands!",
-  "No dessert until you finish!", "Stop running in the house!",
-  "Don't touch that!", "Say please and thank you!", "Go take a bath!",
-  "Five more minutes!", "Money doesn't grow on trees!", "Close the door!",
-  "Wear a jacket!", "Stop bothering your brother!", "No jumping on the bed!"
-];
-
-const CORRECT_MESSAGES = [
-  "Radical! 🤙", "Cowabunga! 🌊", "Gnarly! 🏄", "Tubular! 🔥",
-  "Hang ten! 🤟", "Sick trick! 💥", "Epic wave! 🌊",
-  "Totally awesome! ⭐", "Shredding it! 🎸", "Bodacious! 🏆"
-];
-
-const LUNCHLADY_MESSAGES = [
-  "ORDER UP! 🍝", "Lunch is SERVED! 🍕", "FOOD FIGHT! 🌮",
-  "Eat THIS! 🍔", "Extra helpings! 🍟", "Kitchen combo! 🧁",
-  "Special of the day! 🍖", "Cafeteria SMASH! 🥧",
-  "Get your trays! 🍗", "Serving heat! 🔥"
-];
-
-const GRANDMA_MESSAGES = [
-  "WHACK! 🦯", "Take THAT, sonny! 👵", "Not today! 🦯",
-  "Grandma says NO! 💥", "Back off! 👵", "Have some cane! 🦯",
-  "Old school! 💪", "Respect your elders! 👵",
-  "Get off my wave! 🦯", "Still got it! 💥"
-];
-
-const CONFETTI_ITEMS = ['🌊', '⭐', '🏄', '🐚', '🌴', '🎉', '🤙', '🔥', '🏆', '🦩'];
-
-const LEADERBOARD_DATA = [
-  { name: 'The Hot Lunch Lady', emoji: '🦸‍♀️', score: 9999, quote: "Nobody beats the Lunch Lady!" },
-  { name: 'Shai', emoji: '🏄‍♂️', score: 420, quote: "I surfed before it was cool" },
-  { name: 'Quinn', emoji: '🏄‍♀️', score: 380, quote: "Wave queen forever!" },
-  { name: 'Benj & Sam', emoji: '🏄‍♂️🏄', score: 350, quote: "Twin power activate!" },
-  { name: 'Jackie', emoji: '🐉🏄', score: 310, quote: "Catch you on the flip side!" },
-  { name: 'Grandma', emoji: '👵🏄', score: 280, quote: "Back in my day we surfed uphill!" },
-  { name: 'Wilem', emoji: '⚾🏄‍♂️', score: 250, quote: "Last one in is a kook!" }
-];
-
-// ===== GAME STATE =====
-let state = {
-  selectedChar: 'webb',
-  currentLevel: 0,
-  score: 0,
-  totalScore: 0,
-  streak: 0,
-  lives: 3,
-  correctCount: 0,
-  unlockedChars: ['webb', 'wilem', 'quinn', 'jackie', 'shai', 'twins', 'grandma'],
-  completedLevels: [],
-  highScore: 0,
-  answering: false
-};
-
-// Load saved state
-function loadState() {
-  try {
-    const saved = localStorage.getItem('webbSurfMath');
-    if (saved) {
-      const s = JSON.parse(saved);
-      state.unlockedChars = s.unlockedChars || ['webb', 'wilem', 'quinn', 'jackie', 'shai', 'twins', 'grandma'];
-      state.completedLevels = s.completedLevels || [];
-      state.selectedChar = s.selectedChar || 'webb';
-      state.highScore = s.highScore || 0;
-      state.totalScore = s.totalScore || 0;
-    }
-  } catch(e) {}
-}
-
-function saveState() {
-  try {
-    localStorage.setItem('webbSurfMath', JSON.stringify({
-      unlockedChars: state.unlockedChars,
-      completedLevels: state.completedLevels,
-      selectedChar: state.selectedChar,
-      highScore: state.highScore,
-      totalScore: state.totalScore
-    }));
-  } catch(e) {}
-}
-
-// ===== SCREEN MANAGEMENT =====
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-}
-
-function showTitle() { showScreen('title-screen'); }
-
-function showCharacterSelect() {
-  showScreen('char-screen');
-  renderCharacters();
-}
-
-function showLevelSelect() {
-  showScreen('level-screen');
-  renderLevels();
-}
-
-function showLeaderboard() {
-  showScreen('leaderboard-screen');
-  renderLeaderboard();
-}
-
-// ===== CHARACTER SELECT =====
-function renderCharacters() {
-  const grid = document.getElementById('char-grid');
-  grid.innerHTML = '';
-  CHARACTERS.forEach(c => {
-    const unlocked = state.unlockedChars.includes(c.id);
-    const selected = state.selectedChar === c.id;
-    const card = document.createElement('div');
-    card.className = 'char-card' + (selected ? ' selected' : '') + (!unlocked ? ' locked' : '');
-    if (unlocked) {
-      card.onclick = () => { state.selectedChar = c.id; renderCharacters(); };
-    }
-    card.innerHTML = unlocked
-      ? `<div class="char-emoji">${c.emoji}</div>
-         <div class="char-name">${c.name}</div>
-         <div class="char-board">${c.board} ${c.board} ${c.board}</div>`
-      : `<div class="char-emoji">❓</div>
-         <div class="char-name">${c.name}</div>
-         <div class="lock-icon">🔒</div>
-         <div class="char-board" style="font-size:9px;">Beat Level ${c.unlockLevel}</div>`;
-    grid.appendChild(card);
-  });
-}
-
-function confirmCharacter() {
-  saveState();
-  showTitle();
-}
-
-// ===== LEVEL SELECT =====
-function renderLevels() {
-  const grid = document.getElementById('level-grid');
-  grid.innerHTML = '';
-  LEVELS.forEach((lvl, i) => {
-    const unlocked = i === 0 || state.completedLevels.includes(i);
-    const completed = state.completedLevels.includes(lvl.id);
-    const card = document.createElement('div');
-    card.className = 'level-card' + (!unlocked ? ' locked' : '') + (completed ? ' completed' : '');
-    if (unlocked) {
-      card.onclick = () => startLevel(i);
-    }
-    card.innerHTML = `
-      <div class="level-num">${lvl.emoji} ${lvl.id}</div>
-      <div class="level-name">${lvl.name}</div>
-      <div class="level-desc">${lvl.desc}</div>
-      ${completed ? '<div style="color:#4caf50;font-size:20px;margin-top:4px;">✅</div>' : ''}
-      ${!unlocked ? '<div style="font-size:20px;margin-top:4px;">🔒</div>' : ''}
-    `;
-    grid.appendChild(card);
-  });
-}
-
-// ===== LEADERBOARD =====
-function renderLeaderboard() {
-  const panel = document.getElementById('leaderboard-panel');
-  const entries = [...LEADERBOARD_DATA];
-  // Add Webb's current score
-  const webbEntry = { name: 'Webb ⬅️ YOU', emoji: '🏄', score: state.totalScore, quote: "That's me!", isPlayer: true };
-
-  entries.push(webbEntry);
-  entries.sort((a, b) => b.score - a.score);
-
-  panel.innerHTML = '<div class="leaderboard-title">🏆 Beach Scoreboard 🏆</div>';
-  entries.forEach((e, i) => {
-    const row = document.createElement('div');
-    row.className = 'lb-row' + (e.isPlayer ? ' player-row' : '');
-    row.innerHTML = `
-      <div class="lb-rank">#${i + 1}</div>
-      <div class="lb-avatar">${e.emoji}</div>
-      <div class="lb-info">
-        <div class="lb-name">${e.name}</div>
-        <div class="lb-quote">"${e.quote}"</div>
-      </div>
-      <div class="lb-score">${e.score}</div>
-    `;
-    panel.appendChild(row);
-  });
-}
-
-// ===== MATH QUESTION GENERATION =====
-function generateQuestion(level) {
-  const lvl = LEVELS[level];
-  const op = lvl.ops[Math.floor(Math.random() * lvl.ops.length)];
-  let a, b, answer;
-
-  switch(op) {
-    case '+':
-      a = randInt(lvl.min, lvl.max);
-      b = randInt(lvl.min, lvl.max);
-      answer = a + b;
-      break;
-    case '-':
-      a = randInt(lvl.min, lvl.max);
-      b = randInt(lvl.min, a); // ensure non-negative result
-      answer = a - b;
-      break;
-    case '×':
-      a = randInt(lvl.min, Math.min(lvl.max, 12));
-      b = randInt(lvl.min, Math.min(lvl.max, 12));
-      answer = a * b;
-      break;
-    case '÷':
-      b = randInt(1, Math.min(lvl.max, 10));
-      answer = randInt(1, Math.min(lvl.max, 10));
-      a = b * answer; // ensures clean division
-      break;
-  }
-
-  const text = `${a} ${op} ${b} = ?`;
-
-  // Generate wrong answers
-  const wrongs = new Set();
-  while(wrongs.size < 3) {
-    let w = answer + randInt(-5, 5);
-    if (w < 0) w = Math.abs(w);
-    if (w !== answer && !wrongs.has(w)) wrongs.add(w);
-  }
-
-  const choices = shuffle([answer, ...wrongs]);
-  return { text, answer, choices };
-}
-
-function randInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-// ===== GAMEPLAY =====
-let currentQuestion = null;
-
-function startLevel(levelIndex) {
-  state.currentLevel = levelIndex;
-  state.score = 0;
-  state.streak = 0;
-  state.lives = 3;
-  state.correctCount = 0;
-  state.answering = false;
-
-  const char = CHARACTERS.find(c => c.id === state.selectedChar);
-  document.getElementById('surfer-emoji').textContent = char.emoji;
-  document.getElementById('surfer-board').textContent = char.board + (char.id === 'twins' ? char.board : '');
-
-  showScreen('game-screen');
-  updateHUD();
-  nextQuestion();
-}
-
-function updateHUD() {
-  const lvl = LEVELS[state.currentLevel];
-  document.getElementById('hud-level').textContent = `${lvl.emoji} ${lvl.name}`;
-  document.getElementById('hud-score').textContent = `⭐ ${state.score}`;
-  document.getElementById('hud-progress').textContent = `${state.correctCount}/5 waves`;
-
-  const streakText = state.streak >= 2 ? `🔥 x${state.streak}` : '';
-  document.getElementById('hud-streak').textContent = streakText;
-
-  let livesHTML = '';
-  for (let i = 0; i < 3; i++) {
-    livesHTML += i < state.lives ? '🏄' : '💀';
-  }
-  document.getElementById('hud-lives').innerHTML = livesHTML;
-}
-
-function nextQuestion() {
-  if (state.correctCount >= 5) {
-    levelComplete();
-    return;
-  }
-
-  state.answering = false;
-  currentQuestion = generateQuestion(state.currentLevel);
-
-  // Pick random obstacle and phrase
-  const obstacle = OBSTACLES[Math.floor(Math.random() * OBSTACLES.length)];
-  const phrase = GROWNUP_PHRASES[Math.floor(Math.random() * GROWNUP_PHRASES.length)];
-
-  // Set obstacle
-  const obstacleEl = document.getElementById('obstacle');
-  obstacleEl.className = 'obstacle-container entering';
-  document.getElementById('obstacle-emoji').textContent = obstacle.emoji;
-  document.getElementById('speech-bubble').textContent = phrase;
-
-  // Reset surfer
-  const surfer = document.getElementById('surfer');
-  surfer.className = 'surfer-container';
-  void surfer.offsetWidth; // force reflow
-  surfer.style.animation = '';
-
-  // Set question
-  document.getElementById('question-text').textContent = currentQuestion.text;
-
-  // Set answers
-  const grid = document.getElementById('answers-grid');
-  grid.innerHTML = '';
-  currentQuestion.choices.forEach(choice => {
-    const btn = document.createElement('button');
-    btn.className = 'answer-btn';
-    btn.textContent = choice;
-    btn.onclick = () => checkAnswer(choice, btn);
-    grid.appendChild(btn);
-  });
-
-  // Allow answering after a brief delay
-  setTimeout(() => { state.answering = true; }, 300);
-}
-
-function checkAnswer(choice, btn) {
-  if (!state.answering) return;
-  state.answering = false;
-  playSound('click');
-
-  const correct = choice === currentQuestion.answer;
-  const surfer = document.getElementById('surfer');
-  const obstacle = document.getElementById('obstacle');
-
-  // Highlight all buttons
-  document.querySelectorAll('.answer-btn').forEach(b => {
-    if (parseInt(b.textContent) === currentQuestion.answer) {
-      b.classList.add('correct');
-    } else if (b === btn && !correct) {
-      b.classList.add('wrong');
-    }
-    b.onclick = null;
-  });
-
-  if (correct) {
-    // Correct!
-    state.correctCount++;
-    state.streak++;
-    const levelMultiplier = state.currentLevel + 1;
-    const streakBonus = Math.min(state.streak, 5);
-    const points = 10 * levelMultiplier * streakBonus;
-    state.score += points;
-    state.totalScore += points;
-
-    surfer.className = 'surfer-container dodge';
-    const soundType = state.selectedChar === 'lunchlady' ? 'foodthrow' : state.selectedChar === 'grandma' ? 'canewhack' : 'correct';
-    playSound(soundType);
-    // Delay the obstacle blast slightly so the surfer turns first, then spray hits
-    setTimeout(() => {
-      showSprayBlast();
-      obstacle.className = 'obstacle-container dodged';
-    }, 300);
-
-    // Show splash message (special characters get themed messages!)
-    const msgs = state.selectedChar === 'lunchlady' ? LUNCHLADY_MESSAGES : state.selectedChar === 'grandma' ? GRANDMA_MESSAGES : CORRECT_MESSAGES;
-    showSplash(msgs[Math.floor(Math.random() * msgs.length)] + ` +${points}`);
-
-    updateHUD();
-    setTimeout(() => nextQuestion(), 1200);
-
-  } else {
-    // Wrong!
-    state.streak = 0;
-    state.lives--;
-
-    surfer.className = 'surfer-container wipeout';
-    obstacle.className = 'obstacle-container hit';
-    playSound('wrong');
-
-    // Show the grownup phrase zooming in
-    const phrase = document.getElementById('speech-bubble').textContent;
-    showGrownupZoom(phrase);
-
-    updateHUD();
-
-    if (state.lives <= 0) {
-      setTimeout(() => gameOver(), 1800);
-    } else {
-      setTimeout(() => nextQuestion(), 1800);
-    }
-  }
-}
-
-function showSplash(text) {
-  const el = document.createElement('div');
-  el.className = 'splash-effect';
-  el.textContent = text;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1100);
-}
-
-function showSprayBlast() {
-  const container = document.createElement('div');
-  container.className = 'spray-container';
-  document.body.appendChild(container);
-
-  // Get surfer position for spray origin
-  const surferEl = document.getElementById('surfer');
-  const rect = surferEl.getBoundingClientRect();
-  const originX = rect.right - 20;
-  const originY = rect.top + rect.height / 2;
-
-  const isLunchLady = state.selectedChar === 'lunchlady';
-  const isGrandma = state.selectedChar === 'grandma';
-
-  if (isGrandma) {
-    // GRANDMA: Cane whack + denture throw attack!
-    // BIG cane swinging across
-    const cane = document.createElement('div');
-    cane.style.cssText = `position:absolute; font-size:120px; left:${originX - 30}px; top:${originY - 70}px; z-index:10; pointer-events:none;`;
-    cane.textContent = '🦯';
-    container.appendChild(cane);
-
-    cane.animate([
-      { transform: 'rotate(-60deg) translateX(0px)', opacity: 1 },
-      { transform: 'rotate(40deg) translateX(200px)', opacity: 1, offset: 0.4 },
-      { transform: 'rotate(50deg) translateX(220px)', opacity: 1, offset: 0.5 },
-      { transform: 'rotate(30deg) translateX(180px)', opacity: 0 }
-    ], { duration: 600, easing: 'ease-in-out', fill: 'forwards' });
-
-    // Flying dentures!
-    const dentureEmojis = ['🦷', '🦷', '🦷', '🦷', '🦷', '🦷'];
-    for (let i = 0; i < 6; i++) {
-      const denture = document.createElement('div');
-      denture.className = 'spray-droplet';
-      denture.textContent = dentureEmojis[i];
-      denture.style.fontSize = (30 + Math.random() * 18) + 'px';
-      const angle = -30 + Math.random() * 60;
-      const distance = 180 + Math.random() * 300;
-      const dx = Math.cos(angle * Math.PI / 180) * distance;
-      const dy = Math.sin(angle * Math.PI / 180) * distance;
-      const duration = 0.5 + Math.random() * 0.3;
-      const startY = originY + (Math.random() - 0.5) * 50;
-
-      denture.style.left = originX + 'px';
-      denture.style.top = startY + 'px';
-
-      denture.animate([
-        { transform: 'scale(0.3) rotate(0deg)', opacity: 1, left: originX + 'px', top: startY + 'px' },
-        { transform: 'scale(1.6) rotate(' + (180 + Math.random() * 540) + 'deg)', opacity: 0, left: (originX + dx) + 'px', top: (startY + dy) + 'px' }
-      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards', delay: 100 + Math.random() * 150 });
-
-      container.appendChild(denture);
-    }
-
-    // Impact stars and sparks on hit
-    setTimeout(() => {
-      const impactX = originX + 200;
-      const impactY = originY;
-      const impacts = ['💥', '⭐', '💫', '✨', '💢', '🦷', '💥', '💫'];
-      for (let i = 0; i < 8; i++) {
-        const star = document.createElement('div');
-        star.className = 'spray-droplet';
-        star.textContent = impacts[i];
-        star.style.fontSize = (24 + Math.random() * 20) + 'px';
-        const angle = Math.random() * 360;
-        const distance = 60 + Math.random() * 150;
-        const dx = Math.cos(angle * Math.PI / 180) * distance;
-        const dy = Math.sin(angle * Math.PI / 180) * distance;
-
-        star.style.left = impactX + 'px';
-        star.style.top = impactY + 'px';
-
-        star.animate([
-          { transform: 'scale(0.3) rotate(0deg)', opacity: 1, left: impactX + 'px', top: impactY + 'px' },
-          { transform: 'scale(1.5) rotate(' + (Math.random() * 360) + 'deg)', opacity: 0, left: (impactX + dx) + 'px', top: (impactY + dy) + 'px' }
-        ], { duration: 500 + Math.random() * 300, easing: 'ease-out', fill: 'forwards' });
-
-        container.appendChild(star);
-      }
-    }, 250);
-
-  } else if (isLunchLady) {
-    // HOT LUNCH LADY: Throw cafeteria food!
-    for (let i = 0; i < 12; i++) {
-      const food = document.createElement('div');
-      food.className = 'spray-droplet';
-      food.textContent = CAFETERIA_FOOD[Math.floor(Math.random() * CAFETERIA_FOOD.length)];
-      food.style.fontSize = (28 + Math.random() * 20) + 'px';
-      const angle = -35 + Math.random() * 70;
-      const distance = 180 + Math.random() * 380;
-      const dx = Math.cos(angle * Math.PI / 180) * distance;
-      const dy = Math.sin(angle * Math.PI / 180) * distance;
-      const duration = 0.5 + Math.random() * 0.4;
-      const startY = originY + (Math.random() - 0.5) * 50;
-
-      food.style.left = originX + 'px';
-      food.style.top = startY + 'px';
-
-      food.animate([
-        { transform: 'scale(0.3) rotate(0deg)', opacity: 1, left: originX + 'px', top: startY + 'px' },
-        { transform: 'scale(1.8) rotate(' + (180 + Math.random() * 360) + 'deg)', opacity: 0, left: (originX + dx) + 'px', top: (startY + dy) + 'px' }
-      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
-
-      container.appendChild(food);
-    }
-
-    // Add some splatter particles (brown/orange for food mess)
-    for (let i = 0; i < 10; i++) {
-      const splat = document.createElement('div');
-      splat.className = 'spray-particle';
-      const size = 10 + Math.random() * 16;
-      const angle = -30 + Math.random() * 60;
-      const distance = 200 + Math.random() * 300;
-      const dx = Math.cos(angle * Math.PI / 180) * distance;
-      const dy = Math.sin(angle * Math.PI / 180) * distance;
-      const duration = 0.4 + Math.random() * 0.4;
-      const colors = ['rgba(210,120,50,0.9)', 'rgba(255,200,80,0.8)', 'rgba(180,80,30,0.85)', 'rgba(240,160,60,0.9)'];
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      const startY = originY + (Math.random() - 0.5) * 60;
-
-      splat.style.cssText = `left:${originX}px; top:${startY}px; width:${size}px; height:${size}px; background:${color};`;
-
-      splat.animate([
-        { transform: 'scale(1)', opacity: 0.9, left: originX + 'px', top: startY + 'px' },
-        { transform: 'scale(0.2)', opacity: 0, left: (originX + dx) + 'px', top: (startY + dy) + 'px' }
-      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
-
-      container.appendChild(splat);
-    }
-
-  } else {
-    // Normal surfer: Spray water particles flying toward obstacle
-    const droplets = ['💦', '💧', '🌊', '💦', '💧', '💦', '🌊', '💦'];
-    for (let i = 0; i < 18; i++) {
-      const particle = document.createElement('div');
-      particle.className = 'spray-particle';
-      const size = 8 + Math.random() * 18;
-      const angle = -30 + Math.random() * 60;
-      const distance = 200 + Math.random() * 400;
-      const dx = Math.cos(angle * Math.PI / 180) * distance;
-      const dy = Math.sin(angle * Math.PI / 180) * distance;
-      const duration = 0.4 + Math.random() * 0.5;
-
-      particle.style.cssText = `
-        left: ${originX}px; top: ${originY + (Math.random() - 0.5) * 60}px;
-        width: ${size}px; height: ${size}px;
-        background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(135,206,235,0.7));
-        animation-duration: ${duration}s;
-        animation-delay: ${Math.random() * 0.15}s;
-      `;
-      particle.animate([
-        { transform: 'scale(1)', opacity: 0.9, left: originX + 'px', top: (originY + (Math.random() - 0.5) * 60) + 'px' },
-        { transform: 'scale(0.3)', opacity: 0, left: (originX + dx) + 'px', top: (originY + dy) + 'px' }
-      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
-
-      container.appendChild(particle);
-    }
-
-    // Emoji splash droplets
-    for (let i = 0; i < 8; i++) {
-      const drop = document.createElement('div');
-      drop.className = 'spray-droplet';
-      drop.textContent = droplets[i % droplets.length];
-      const angle = -40 + Math.random() * 80;
-      const distance = 150 + Math.random() * 350;
-      const dx = Math.cos(angle * Math.PI / 180) * distance;
-      const dy = Math.sin(angle * Math.PI / 180) * distance;
-      const duration = 0.5 + Math.random() * 0.4;
-
-      drop.style.left = originX + 'px';
-      drop.style.top = (originY + (Math.random() - 0.5) * 40) + 'px';
-
-      drop.animate([
-        { transform: 'scale(0.5) rotate(0deg)', opacity: 1, left: originX + 'px', top: (originY + (Math.random() - 0.5) * 40) + 'px' },
-        { transform: 'scale(1.5) rotate(180deg)', opacity: 0, left: (originX + dx) + 'px', top: (originY + dy) + 'px' }
-      ], { duration: duration * 1000, easing: 'ease-out', fill: 'forwards' });
-
-      container.appendChild(drop);
-    }
-  }
-
-  setTimeout(() => container.remove(), 1200);
-}
-
-function showGrownupZoom(text) {
-  const el = document.createElement('div');
-  el.className = 'grownup-zoom';
-  el.innerHTML = `<div class="grownup-zoom-text">${text}</div>`;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1600);
-}
-
-// ===== LEVEL COMPLETE =====
-function levelComplete() {
-  const levelId = LEVELS[state.currentLevel].id;
-  if (!state.completedLevels.includes(levelId)) {
-    state.completedLevels.push(levelId);
-  }
-
-  // Check character unlock
-  const newUnlock = CHARACTERS.find(c =>
-    c.unlockLevel === levelId && !state.unlockedChars.includes(c.id)
-  );
-  if (newUnlock) {
-    state.unlockedChars.push(newUnlock.id);
-  }
-
-  if (state.totalScore > state.highScore) {
-    state.highScore = state.totalScore;
-  }
-  saveState();
-
-  // Show complete screen
-  playSound('levelup');
-  showScreen('complete-screen');
-  document.getElementById('complete-title').textContent =
-    state.currentLevel === 6 ? '🏆 YOU BEAT THE TSUNAMI! 🏆' : '🌊 Level Complete! 🌊';
-  document.getElementById('complete-score').innerHTML =
-    `Score: ⭐ ${state.score}<br>Total: ⭐ ${state.totalScore}`;
-
-  // Unlock section
-  const unlockSection = document.getElementById('unlock-section');
-  if (newUnlock) {
-    unlockSection.innerHTML = `
-      <div class="unlock-announcement">New Surfer Unlocked!</div>
-      <div class="unlock-char">${newUnlock.emoji}</div>
-      <div class="unlock-announcement" style="font-size:clamp(16px,3vw,24px);">${newUnlock.name}</div>
-      <div style="color:rgba(255,255,255,0.7); font-style:italic;">"${newUnlock.quote}"</div>
-    `;
-  } else {
-    unlockSection.innerHTML = '';
-  }
-
-  // Next level button
-  const nextBtn = document.getElementById('btn-next-level');
-  nextBtn.style.display = state.currentLevel < LEVELS.length - 1 ? '' : 'none';
-
-  // Confetti!
-  spawnConfetti();
-}
-
-function spawnConfetti() {
-  const container = document.getElementById('confetti-container');
-  container.innerHTML = '';
-  for (let i = 0; i < 40; i++) {
-    const el = document.createElement('div');
-    el.className = 'confetti';
-    el.textContent = CONFETTI_ITEMS[Math.floor(Math.random() * CONFETTI_ITEMS.length)];
-    el.style.left = Math.random() * 100 + '%';
-    el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
-    el.style.animationDelay = Math.random() * 1 + 's';
-    el.style.fontSize = (16 + Math.random() * 20) + 'px';
-    container.appendChild(el);
-  }
-}
-
-function nextLevel() {
-  if (state.currentLevel < LEVELS.length - 1) {
-    startLevel(state.currentLevel + 1);
-  }
-}
-
-function replayLevel() {
-  startLevel(state.currentLevel);
-}
-
-// ===== GAME OVER =====
-function gameOver() {
-  playSound('gameover');
-  showScreen('gameover-screen');
-  const phrases = [
-    "The grown-ups got you! 😱",
-    "Too many wipeouts! Try again! 💪",
-    "The vegetables won this time... 🥦",
-    "Clean your room? NEVER! Try again! 🧹",
-    "Shake it off and paddle back out! 🏄"
-  ];
-  document.getElementById('gameover-msg').textContent =
-    phrases[Math.floor(Math.random() * phrases.length)];
-  saveState();
-}
-
-// ===== INIT =====
-loadState();
-showTitle();
-</script>
+  <footer>Made with &#10084; for Webb</footer>
 </body>
 </html>
